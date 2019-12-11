@@ -1,2 +1,4 @@
 build/
 visual_studio/
+common/lib/readfile.lib
+common/lib/lodepng.lib
