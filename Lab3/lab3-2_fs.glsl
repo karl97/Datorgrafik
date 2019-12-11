@@ -22,6 +22,7 @@ uniform float slider_scale;
 uniform vec4 light_strength;
 
 uniform sampler2D texture_diffuse;
+uniform samplerCube texture_environment;
 
 vec4 diffuse_brdf() // lambertian diffuse lightning
 {
@@ -113,30 +114,22 @@ void main () {
   vec4 f0 = f0_var; 
   float alpha = alpha_var; // alpha parameter for D function
   vec4 n = normalize(normal);
-  vec4 outdir;
-  vec4 position_edit = position;
+  vec4 outdir = normalize(position - eyepos);
+  vec3 refl = reflect(outdir.xyz, n.xyz);
+  vec4 texEnv = texture(texture_environment, refl);
   for (int l = 0; l < light_count; ++l )
   {
-	vec4 l_in;
-	if(gl_FragCoord.x > window_width/2)
-	{
-		position_edit.x = position_edit.x;// + 0.5;
-		l_in = normalize(light_position[l] - position_edit);
-		outdir=normalize(position_edit-eyepos);
-		frag_colour = frag_colour + light_strength[l] * light_colour[l] * BP_brdf(kl_var, kg_var, f_var, l_in, n, outdir, tex * diffuse_colour) * constrain(dot(l_in, n));
-	}else
-	{
-		position_edit.x = position_edit.x;// - 0.5;
-		l_in = normalize(light_position[l] - position_edit);
-		outdir=normalize(position_edit-eyepos);
-		frag_colour = frag_colour + light_strength[l] * light_colour[l] * CT_brdf(n, l_in, outdir, f0, alpha, slider_scale, 1-slider_scale, tex * diffuse_colour)* constrain(dot(l_in, n));
-	}
-	//frag_colour = frag_colour + light_colour[l] * BP_brdf(0.1, 0.9, 10, l_in, n, outdir) * constrain(dot(l_in, n));
-	//frag_colour = frag_colour + light_colour[l] * BP_brdf(0.1, 0.9, 1000, l_in, n, outdir) * constrain(dot(l_in, n));
-	//frag_colour = frag_colour + light_colour[l] * BP_brdf(1, 0, 10, l_in, n, outdir) * constrain(dot(l_in, n));
-	//frag_colour = frag_colour + light_colour[l] * CT_brdf(n, l_in, outdir, f0, alpha, 0.8, 0.2)* constrain(dot(l_in, n));	
+		vec4 l_in = normalize(light_position[l] - position);
+		if(gl_FragCoord.x > window_width/2)
+		{
+			frag_colour = frag_colour + light_strength[l] * light_colour[l] * BP_brdf(kl_var, kg_var, f_var, l_in, n, outdir, tex * diffuse_colour) * constrain(dot(l_in, n));
+		}else
+		{
+			frag_colour = frag_colour + light_strength[l] * light_colour[l] * CT_brdf(n, l_in, outdir, f0, alpha, slider_scale, 1-slider_scale, tex * diffuse_colour)* constrain(dot(l_in, n));
+		}
 	
 	}
-
-
+	float r = 1;
+	frag_colour = r * texEnv + (1.0 - r) * frag_colour;
+	//frag_colour = vec4((n.xyz+ 1.0) /2.0, 1.0);
 }

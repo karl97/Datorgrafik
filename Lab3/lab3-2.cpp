@@ -2,7 +2,7 @@
 // Replace with your own code, starting from what you had in Lab 1,
 // but use the geometry defined below.
 // GL Extension Wrangler
-#define USE_BUNNY 0
+
 
 
 #include "imgui.h"
@@ -26,67 +26,223 @@
 #define TINYOBJLOADER_IMPLEMENTATION 
 #include "tiny_obj_loader.h"
 
+#include "config.h"
+
+#if !USE_OBJ
+float points[] = {
+-0.500000, 0.809017, 0.000000,
+-0.500000, 0.809017, 0.000000,
+-0.500000, 0.809017, 0.000000,
+-0.500000, 0.809017, 0.000000,
+-0.500000, 0.809017, 0.000000,
+0.500000, 0.809017, 0.000000,
+0.500000, 0.809017, 0.000000,
+0.500000, 0.809017, 0.000000,
+0.500000, 0.809017, 0.000000,
+0.500000, 0.809017, 0.000000,
+-0.500000, -0.809017, 0.000000,
+-0.500000, -0.809017, 0.000000,
+-0.500000, -0.809017, 0.000000,
+-0.500000, -0.809017, 0.000000,
+-0.500000, -0.809017, 0.000000,
+0.500000, -0.809017, 0.000000,
+0.500000, -0.809017, 0.000000,
+0.500000, -0.809017, 0.000000,
+0.500000, -0.809017, 0.000000,
+0.500000, -0.809017, 0.000000,
+0.000000, -0.500000, 0.809017,
+0.000000, -0.500000, 0.809017,
+0.000000, -0.500000, 0.809017,
+0.000000, -0.500000, 0.809017,
+0.000000, -0.500000, 0.809017,
+0.000000, 0.500000, 0.809017,
+0.000000, 0.500000, 0.809017,
+0.000000, 0.500000, 0.809017,
+0.000000, 0.500000, 0.809017,
+0.000000, 0.500000, 0.809017,
+0.000000, -0.500000, -0.809017,
+0.000000, -0.500000, -0.809017,
+0.000000, -0.500000, -0.809017,
+0.000000, -0.500000, -0.809017,
+0.000000, -0.500000, -0.809017,
+0.000000, 0.500000, -0.809017,
+0.000000, 0.500000, -0.809017,
+0.000000, 0.500000, -0.809017,
+0.000000, 0.500000, -0.809017,
+0.000000, 0.500000, -0.809017,
+0.809017, 0.000000, -0.500000,
+0.809017, 0.000000, -0.500000,
+0.809017, 0.000000, -0.500000,
+0.809017, 0.000000, -0.500000,
+0.809017, 0.000000, -0.500000,
+0.809017, 0.000000, 0.500000,
+0.809017, 0.000000, 0.500000,
+0.809017, 0.000000, 0.500000,
+0.809017, 0.000000, 0.500000,
+0.809017, 0.000000, 0.500000,
+-0.809017, 0.000000, -0.500000,
+-0.809017, 0.000000, -0.500000,
+-0.809017, 0.000000, -0.500000,
+-0.809017, 0.000000, -0.500000,
+-0.809017, 0.000000, -0.500000,
+-0.809017, 0.000000, 0.500000,
+-0.809017, 0.000000, 0.500000,
+-0.809017, 0.000000, 0.500000,
+-0.809017, 0.000000, 0.500000,
+-0.809017, 0.000000, 0.500000,
+};
+float uv_coords[] = {
+0.072405, 0.144686,
+0.271330, 0.100330,
+0.481007, 0.129901,
+0.681948, 0.115116,
+0.928587, 0.107723,
+0.298880, 0.706510,
+0.449421, 0.736084,
+0.108695, 0.129901,
+0.847270, 0.699121,
+0.868776, 0.728691,
+0.576437, 0.721299,
+0.319044, 0.750869,
+0.548883, 0.736084,
+0.388265, 0.115116,
+0.397674, 0.713906,
+0.149690, 0.122508,
+0.347942, 0.115116,
+0.583157, 0.107723,
+0.780738, 0.100331,
+0.229663, 0.107723,
+0.334360, 0.688820,
+0.181276, 0.721299,
+0.379528, 0.721299,
+0.190684, 0.122508,
+0.358023, 0.736084,
+0.103319, 0.713906,
+0.245120, 0.706510,
+0.083157, 0.699121,
+0.310060, 0.102510,
+0.222942, 0.721299,
+0.772001, 0.728691,
+0.618776, 0.721299,
+0.745120, 0.721299,
+0.433292, 0.115116,
+0.598614, 0.713906,
+0.520657, 0.721299,
+0.650362, 0.736084,
+0.700765, 0.728691,
+0.878184, 0.107723,
+0.671867, 0.743476,
+0.914475, 0.743476,
+0.819717, 0.736084,
+0.201437, 0.721299,
+0.633561, 0.122508,
+0.796195, 0.743476,
+0.140953, 0.728691,
+0.122136, 0.706514,
+0.262593, 0.721299,
+0.157754, 0.728691,
+0.825765, 0.115116,
+0.723614, 0.728691,
+0.897001, 0.721299,
+0.499152, 0.736084,
+0.731007, 0.115116,
+0.469582, 0.721299,
+0.045523, 0.691729,
+0.967566, 0.721299,
+0.283410, 0.671570,
+0.532754, 0.122508,
+0.418507, 0.706514,
+};
+float normals[] = {
+-0.500000, 0.500000, 0.500000, 0.000000,
+-0.000000, 0.809017, 0.309017, 0.000000,
+0.000000, 0.809017, -0.309017, 0.000000,
+-0.500000, 0.500000, -0.500000, 0.000000,
+-0.809017, 0.309017, 0.000000, 0.000000,
+-0.000000, 0.809017, 0.309017, 0.000000,
+0.000000, 0.809017, -0.309017, 0.000000,
+0.500000, 0.500000, 0.500000, 0.000000,
+0.500000, 0.500000, -0.500000, 0.000000,
+0.809017, 0.309017, 0.000000, 0.000000,
+-0.809017, -0.309017, -0.000000, 0.000000,
+0.000000, -0.809017, 0.309017, 0.000000,
+-0.000000, -0.809017, -0.309017, 0.000000,
+-0.500000, -0.500000, 0.500000, 0.000000,
+-0.500000, -0.500000, -0.500000, 0.000000,
+0.500000, -0.500000, 0.500000, 0.000000,
+0.000000, -0.809017, 0.309017, 0.000000,
+-0.000000, -0.809017, -0.309017, 0.000000,
+0.500000, -0.500000, -0.500000, 0.000000,
+0.809017, -0.309017, 0.000000, 0.000000,
+-0.309017, 0.000000, 0.809017, 0.000000,
+0.500000, -0.500000, 0.500000, 0.000000,
+0.000000, -0.809017, 0.309017, 0.000000,
+0.309017, -0.000000, 0.809017, 0.000000,
+-0.500000, -0.500000, 0.500000, 0.000000,
+-0.500000, 0.500000, 0.500000, 0.000000,
+-0.000000, 0.809017, 0.309017, 0.000000,
+0.500000, 0.500000, 0.500000, 0.000000,
+-0.309017, 0.000000, 0.809017, 0.000000,
+0.309017, -0.000000, 0.809017, 0.000000,
+-0.309017, 0.000000, -0.809017, 0.000000,
+-0.000000, -0.809017, -0.309017, 0.000000,
+0.500000, -0.500000, -0.500000, 0.000000,
+-0.500000, -0.500000, -0.500000, 0.000000,
+0.309017, 0.000000, -0.809017, 0.000000,
+0.000000, 0.809017, -0.309017, 0.000000,
+-0.500000, 0.500000, -0.500000, 0.000000,
+-0.309017, 0.000000, -0.809017, 0.000000,
+0.500000, 0.500000, -0.500000, 0.000000,
+0.309017, 0.000000, -0.809017, 0.000000,
+0.500000, 0.500000, -0.500000, 0.000000,
+0.500000, -0.500000, -0.500000, 0.000000,
+0.809017, -0.309017, 0.000000, 0.000000,
+0.309017, 0.000000, -0.809017, 0.000000,
+0.809017, 0.309017, 0.000000, 0.000000,
+0.500000, 0.500000, 0.500000, 0.000000,
+0.500000, -0.500000, 0.500000, 0.000000,
+0.809017, -0.309017, 0.000000, 0.000000,
+0.309017, -0.000000, 0.809017, 0.000000,
+0.809017, 0.309017, 0.000000, 0.000000,
+-0.500000, 0.500000, -0.500000, 0.000000,
+-0.809017, 0.309017, 0.000000, 0.000000,
+-0.809017, -0.309017, -0.000000, 0.000000,
+-0.309017, 0.000000, -0.809017, 0.000000,
+-0.500000, -0.500000, -0.500000, 0.000000,
+-0.500000, 0.500000, 0.500000, 0.000000,
+-0.809017, 0.309017, 0.000000, 0.000000,
+-0.309017, 0.000000, 0.809017, 0.000000,
+-0.809017, -0.309017, -0.000000, 0.000000,
+-0.500000, -0.500000, 0.500000, 0.000000,
+};
+unsigned int faces[] = {
+0, 55, 25,
+1, 26, 5,
+2, 6, 35,
+3, 36, 50,
+4, 51, 56,
+7, 27, 45,
+28, 57, 20,
+58, 52, 10,
+53, 37, 30,
+38, 8, 40,
+15, 46, 21,
+16, 22, 11,
+17, 12, 31,
+18, 32, 41,
+19, 42, 47,
+23, 48, 29,
+13, 24, 59,
+33, 14, 54,
+43, 34, 39,
+49, 44, 9,
+};
+#else
+#endif
 
 float g_rotation[2] = { 0,0 };
 int w_height = 600;
 int w_width = 800;
-
-float points[] = {
-	// A cube has 8 vertices, but now we have three copies of each one:
-	-0.5, -0.5, -0.5, //0 0
-	-0.5, -0.5, -0.5, //0 1
-	-0.5, -0.5, -0.5, //0 2
-	//
-	-0.5, -0.5,  0.5, //1 3
-	-0.5, -0.5,  0.5, //1 4
-	-0.5, -0.5,  0.5, //1 5
-	//
-	-0.5,  0.5, -0.5, //2 6
-	-0.5,  0.5, -0.5, //2 7
-	-0.5,  0.5, -0.5, //2 8
-	//
-	-0.5,  0.5,  0.5, //3 9
-	-0.5,  0.5,  0.5, //3 10
-	-0.5,  0.5,  0.5, //3 11
-	//
-	0.5, -0.5, -0.5, //4 12
-	0.5, -0.5, -0.5, //4 13
-	0.5, -0.5, -0.5, //4 14
-	//
-	0.5, -0.5,  0.5, //5 15
-	0.5, -0.5,  0.5, //5 16
-	0.5, -0.5,  0.5, //5 17
-	//
-	0.5,  0.5, -0.5, //6 18
-	0.5,  0.5, -0.5, //6 19
-	0.5,  0.5, -0.5, //6 20
-	//
-	0.5,  0.5,  0.5, //7 21
-	0.5,  0.5,  0.5, //7 22
-	0.5,  0.5,  0.5, //7 23
-};
-
-unsigned short faces[] = {
-	// ... and 12 triangular faces, 
-	// defined by the following vertex indices:
-	0, 9, 6, // 0 3 2
-	0, 3, 9, // 0 1 3
-	//
-	1, 7, 18, // 0 2 6
-	1, 18, 12, // 0 6 4
-	//
-	13, 19, 15, // 4 6 5
-	15, 19, 21, // 5 6 7
-	//
-	16, 22, 10, // 5 7 3
-	16, 10, 4, // 5 3 1
-	//
-	8, 11, 23, // 2 3 7
-	8, 23, 20, // 2 7 6
-	//
-	2, 14, 5, // 0 4 1
-	5, 14, 17 // 1 4 5
-};
 
 void MUL_4x4(float(*C)[4], const float(*A)[4], const float(*B)[4])
 {
@@ -186,17 +342,6 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 
 	}
 
-
-	//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
-	// Update rotation angle here, for example
-
-	//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
-	/*
-	if ((key == GLFW_KEY_RIGHT) && ((action == GLFW_PRESS) || action == GLFW_REPEAT)) { g_rotation[1]++; }
-	if ((key == GLFW_KEY_LEFT) && ((action == GLFW_PRESS) || action == GLFW_REPEAT)) { g_rotation[1]--; }
-	if ((key == GLFW_KEY_UP) && ((action == GLFW_PRESS) || action == GLFW_REPEAT)) { g_rotation[0]++; }
-	if ((key == GLFW_KEY_DOWN) && ((action == GLFW_PRESS) || action == GLFW_REPEAT)) { g_rotation[0]--; }
-	*/
 }
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
@@ -204,25 +349,6 @@ static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
 	glViewport(0, 0, width, height);
 	w_width = width;
 	w_height = height;
-}
-glm::vec4 normals[sizeof(points) / (3 * sizeof(float))];
-
-void normaler() {
-	for (int i = 0; i < sizeof(faces) / (sizeof(short) * 3); i++) {
-		glm::vec3 vertex[3];
-		for (int k = 0; k < 3; k++) {
-			vertex[k] = glm::vec3(points[faces[i * 3 + k] * 3], points[faces[i * 3 + k] * 3 + 1], points[faces[i * 3 + k] * 3 + 2]);
-		}
-		glm::vec3 a = vertex[0] - vertex[1];
-		glm::vec3 b = vertex[0] - vertex[2];
-		glm::vec3 c = glm::normalize(glm::cross(a, b));
-		for (int k = 0; k < 3; k++) {
-			normals[faces[i * 3 + k]] = glm::vec4(c, 0);
-		}
-
-	}
-
-
 }
 
 int main(int argc, char const *argv[])
@@ -256,59 +382,18 @@ int main(int argc, char const *argv[])
 	glDepthFunc(GL_LESS); // depth-testing interprets a smaller value as "closer"
 
   //-----------------------------------------------------------------------------------------------------------------------------------------------------------//
-  // Set up geometry, VBO, EBO, VAO
-
-
-
-	unsigned int VAO;
-	glGenVertexArrays(1, &VAO);
-	glBindVertexArray(VAO);
-
-	unsigned int VBO;
-	unsigned int VBO2;
-
-	unsigned int EBO;
-	glGenBuffers(1, &VBO);
-
-
-	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-
-
-	glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-	glEnableVertexAttribArray(0);
-
-
-	normaler();
-	for (int i = 0; i < sizeof(normals) / sizeof(glm::vec4); i++) {
-
-		std::cout << i << ": ";
-		std::cout << normals[i].x << " ";
-		std::cout << normals[i].y << " ";
-		std::cout << normals[i].z << " ";
-		std::cout << normals[i].w << "\n";
-	};
-
-	glGenBuffers(1, &VBO2);
-	glBindBuffer(GL_ARRAY_BUFFER, VBO2);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
-	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)0);
-	glEnableVertexAttribArray(1);
-
-
-	glGenBuffers(1, &EBO);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(faces), faces, GL_STATIC_DRAW);
-
 	// Textures...
+	unsigned char* image_data;
+	unsigned image_w;
+	unsigned image_h;
+	unsigned image_file;
+
+	//Diffuse texture
 	GLuint texture_handle;
 	glGenTextures(1, &texture_handle);
 	glActiveTexture(GL_TEXTURE0);
 	glBindTexture(GL_TEXTURE_2D, texture_handle);
-	unsigned char* image_data;
-	unsigned image_w;
-	unsigned image_h;
-	unsigned image_file =
+	image_file =
 		lodepng_decode32_file(&image_data, &image_w, &image_h,
 			"../common/data/numberline_hires.png");
 	std::cout << "Read " << image_h << " x " << image_w << " image\n";
@@ -320,14 +405,94 @@ int main(int argc, char const *argv[])
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_w, image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
 
+
+	//Cube map
+	GLuint texture_environment;
+	glGenTextures(1, &texture_environment);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_environment);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
+#if USE_TEST_ENV
+	const char* cubeMapSides[6] = {
+		"../common/data/cube-test_010.png",
+		"../common/data/cube-test_011.png",
+		"../common/data/cube-test_100.png",
+		"../common/data/cube-test_101.png",
+		"../common/data/cube-test_110.png",
+		"../common/data/cube-test_111.png",
+	};
+#else
+	const char* cubeMapSides[6] = {
+		"../common/data/cube_right.png",
+		"../common/data/cube_left.png",
+		"../common/data/cube_up.png",
+		"../common/data/cube_down.png",
+		"../common/data/cube_front.png",
+		"../common/data/cube_back.png",
+	};
+#endif
+
+	for(int i = 0; i < 6; i++)
+	{ 
+		image_file = lodepng_decode32_file(&image_data, &image_w, &image_h,
+			cubeMapSides[i]);
+		std::cout << "Read " << image_h << " x " << image_w << " image\n";
+		glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, GL_RGBA, image_w, image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+
+	}
+	
+
+#if !USE_OBJ
+
+
+	unsigned int VAO_bunny;
+	glGenVertexArrays(1, &VAO_bunny);
+	glBindVertexArray(VAO_bunny);
+
+	unsigned int VBO_position;
+	unsigned int VBO_normal;
+	unsigned int VBO_uv;
+
+	unsigned int EBO_bunny;
+
+
+	glGenBuffers(1, &VBO_position);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_position);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(points), points, GL_STATIC_DRAW);
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
+	glEnableVertexAttribArray(0);
+
+
+	glGenBuffers(1, &VBO_normal);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_normal);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(normals), normals, GL_STATIC_DRAW);
+	glVertexAttribPointer(1, 4, GL_FLOAT, GL_FALSE, sizeof(float) * 4, (void*)0);
+	glEnableVertexAttribArray(1);
+
+
+	glGenBuffers(1, &VBO_uv);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_uv);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(uv_coords), uv_coords, GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, (void*)0);
+	glEnableVertexAttribArray(2);
+
+
+	glGenBuffers(1, &EBO_bunny);
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_bunny);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(faces), faces, GL_STATIC_DRAW);
+
+
+#else
 	//-----------------------------------------------------------------------------------------------
 	//Bunny----------------------------
 	//-----------------------------------------------------------------------------------------------
-#if USE_BUNNY
-	std::string inputfile = "../common/data/bunny.obj";
-#else
-	std::string inputfile = "../common/data/dice (1).obj";
-#endif
+
+	std::string inputfile = OBJ_FILE;
 	std::vector<tinyobj::shape_t> shapes;
 	std::vector<tinyobj::material_t> materials;
 
@@ -401,7 +566,7 @@ int main(int argc, char const *argv[])
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_bunny);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, shapes[0].mesh.indices.size() * sizeof(unsigned int), &shapes[0].mesh.indices[0], GL_STATIC_DRAW);
 
-
+#endif
 
 
 
@@ -461,6 +626,8 @@ int main(int argc, char const *argv[])
 	const GLchar* offset = "offset_value";
 	const GLchar* ls = "light_strength";
 	const GLchar* tex = "texture_diffuse";
+	const GLchar* texEnv = "texture_environment";
+
 
 	int light_count = 4;
 	glm::vec4 light_colour[4] = {
@@ -618,20 +785,31 @@ int main(int argc, char const *argv[])
 		glUniform1f(glGetUniformLocation(shader_program, ss), (float)slider_scale);
 		glUniform4fv(glGetUniformLocation(shader_program, ls), 1, (GLfloat*)&light_strength[0]);
 		glUniform1i(glGetUniformLocation(shader_program, tex), 0);
+		glUniform1i(glGetUniformLocation(shader_program, texEnv), 1);
 
 
 
+#if !USE_OBJ
+	{
+		glUniform1f(glGetUniformLocation(shader_program, offset), -offset_value);
+		glDrawElements(GL_TRIANGLES,
+			sizeof(faces) / sizeof(unsigned int),
+			GL_UNSIGNED_INT,
+			0);
+	}
 
-		//Draw cube
-/*
-glBindVertexArray(VAO);
-glDrawElements(GL_TRIANGLES,
-	sizeof(faces) / sizeof(short),
-	GL_UNSIGNED_SHORT,
-	0);
-	*/
+
+	{
+
+		glUniform1f(glGetUniformLocation(shader_program, offset), +offset_value);
+		glDrawElements(GL_TRIANGLES,
+			sizeof(faces) / sizeof(unsigned int),
+			GL_UNSIGNED_INT,
+			0);
+	}
 
 
+#else
 	//Draw bunny
 		glBindVertexArray(VAO_bunny);
 
@@ -652,7 +830,7 @@ glDrawElements(GL_TRIANGLES,
 				GL_UNSIGNED_INT,
 				0);
 		}
-
+#endif
 
 		//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 

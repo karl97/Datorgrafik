@@ -16,7 +16,7 @@ vec4 pos = (mvp*vp);
 pos = pos / pos.w;
 gl_Position = pos + vec4(offset_value, vec3(0));
 position=m * vp;
-normal=m * n;
+normal=m * vec4(n.xyz, 0);
 uv_coords = uv;
 
 };
