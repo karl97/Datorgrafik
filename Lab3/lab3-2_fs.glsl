@@ -20,6 +20,7 @@ uniform float kg_var;
 uniform float f_var;
 uniform float slider_scale;
 uniform vec4 light_strength;
+uniform float r;
 
 uniform sampler2D texture_diffuse;
 uniform samplerCube texture_environment;
@@ -129,7 +130,6 @@ void main () {
 		}
 	
 	}
-	float r = 1;
 	frag_colour = r * texEnv + (1.0 - r) * frag_colour;
 	//frag_colour = vec4((n.xyz+ 1.0) /2.0, 1.0);
 }

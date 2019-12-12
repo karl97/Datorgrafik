@@ -1,5 +1,5 @@
 #define USE_TEST_ENV 0
-#define USE_OBJ 0
+#define USE_OBJ 1
 
 #if USE_OBJ
 
@@ -8,7 +8,7 @@
 #if USE_BUNNY
 #define OBJ_FILE "../common/data/bunny.obj"
 #else
-#define OBJ_FILE "../common/data/dice.obj"
+#define OBJ_FILE "../common/data/dice (1).obj"
 #endif
 
 

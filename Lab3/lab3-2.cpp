@@ -411,8 +411,8 @@ int main(int argc, char const *argv[])
 	glGenTextures(1, &texture_environment);
 	glActiveTexture(GL_TEXTURE1);
 	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_environment);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
@@ -627,6 +627,7 @@ int main(int argc, char const *argv[])
 	const GLchar* ls = "light_strength";
 	const GLchar* tex = "texture_diffuse";
 	const GLchar* texEnv = "texture_environment";
+	const GLchar* refl = "r";
 
 
 	int light_count = 4;
@@ -656,6 +657,7 @@ int main(int argc, char const *argv[])
 	float f_var = 10;
 	glm::vec4 bunny_color = { 1.0f, 1.0f, 1.0f, 1.0f };
 	float slider_scale = 0.5;
+	float reflect_ratio = 0.5;
 
 	ImGui::CreateContext();
 	ImGui_ImplGlfwGL3_Init(window, true);
@@ -688,7 +690,7 @@ int main(int argc, char const *argv[])
 			ImGui::Text("Cook-Torrance");                           // Display some text (you can use a format string too)
 			ImGui::InputFloat("alpha", &alpha);
 			ImGui::ColorEdit3("f0", (float*)&f0);
-			ImGui::SliderFloat("lambertian-specular", &slider_scale, 0.0f, 1.0f);
+			ImGui::SliderFloat("specular-lambertian", &slider_scale, 0.0f, 1.0f);
 
 			ImGui::Text("Blinn-phong");
 			ImGui::InputFloat("kl", &kl_var);
@@ -717,6 +719,10 @@ int main(int argc, char const *argv[])
 				lightText = std::string("Color light ") + std::to_string(i);
 				ImGui::ColorEdit3(lightText.c_str(), &light_colour[i][0]);
 			}
+
+
+			ImGui::Text("Other");
+			ImGui::SliderFloat("Reflect amount", &reflect_ratio, 0.0f, 1.0f);
 			//ImGui::Checkbox("Demo Window", &show_demo_window);      // Edit bools storing our windows open/close state
 			//ImGui::Checkbox("Another Window", &show_another_window);
 
@@ -777,6 +783,7 @@ int main(int argc, char const *argv[])
 		glUniform4fv(glGetUniformLocation(shader_program, eye), 1, (GLfloat*)&eyepos[0]);
 		glUniform1f(glGetUniformLocation(shader_program, wp), (float)w_width);
 		glUniform1f(glGetUniformLocation(shader_program, av), (float)alpha);
+		glUniform1f(glGetUniformLocation(shader_program, refl), (float)reflect_ratio);
 		glUniform4fv(glGetUniformLocation(shader_program, bc), 1, (GLfloat*)&bunny_color[0]);
 		glUniform4fv(glGetUniformLocation(shader_program, f0v), 1, (GLfloat*)&f0[0]);
 		glUniform1f(glGetUniformLocation(shader_program, klv), (float)kl_var);
