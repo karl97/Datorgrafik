@@ -276,6 +276,72 @@ void invertMatrix(float(*C)[4], float(*A)[4])
 	//and the last row is the same
 }
 
+void calcTangentspace(unsigned int* faces, int numFaces, float* points, float* uv_coords, float* tangent,float* bitangent) {
+	int temp = 1;
+	for (int i = 0; i < numFaces; i++) {
+		glm::vec3 pos[3];
+		glm::vec2 uv[3];
+
+		std::cout << "Face " << i << "\n";
+		for (int k = 0; k < 3; k++) {
+			int index = faces[i * 3 + k];
+			pos[k] = glm::vec3(points[index * 3], points[index * 3 + 1], points[index * 3 + 2]);
+			uv[k] = glm::vec2(points[index * 2], points[index * 2 + 1]);
+			std::cout << "["<< index << "] ";
+		}
+		std::cout << "\n";
+		glm::vec3 e1 = pos[1] - pos[0];
+		glm::vec3 e2 = pos[2] - pos[0];
+		glm::vec2 f1 = uv[1] - uv[0];
+		glm::vec2 f2 = uv[2] - uv[0];
+		double dx = (double)(f1.x)*(double)(f2.y);
+		double dy = (double)(f2.x)*(double)(f1.y);
+		float r = dx - dy;
+		
+
+		int x = 0;
+		std::cout << "pos1: (" << pos[x].x << ", " << pos[x].y << ", " << pos[x].z << ") \n";
+		std::cout << "uv1: (" << uv[x].x << ", " << uv[x].y << ") \n";
+x = 1;
+		std::cout << "pos2: (" << pos[x].x << ", " << pos[x].y << ", " << pos[x].z << ") \n";
+		std::cout << "uv2: (" << uv[x].x << ", " << uv[x].y << ") \n";
+x = 2;
+		std::cout << "pos3: (" << pos[x].x << ", " << pos[x].y << ", " << pos[x].z << ") \n";
+		std::cout << "uv3: (" << uv[x].x << ", " << uv[x].y << ") \n";
+		std::cout << "e1: (" << e1.x << ", " << e1.y << ", " << e1.z << ") \n";
+		std::cout << "e2: (" << e2.x << ", " << e2.y << ", " << e2.z << ") \n";
+		std::cout << "f1: (" << f1.x << ", " << f1.y << ") \n";
+		std::cout << "f2: (" << f2.x << ", " << f2.y << ") \n";
+		std::cout << "dx: " << dx << " \n";
+		std::cout << "dy: " << dy << " \n";
+		std::cout << "r: " << r << " \n";
+
+		glm::vec3 t = (f2.y*e1 - f1.y*e2) / r;
+		glm::vec3 b = (f1.x*e2 - f2.x*e1) / r;
+		for (int k = 0; k < 3; k++) {
+			int index = faces[i * 3 + k];
+			tangent[index * 3 + 0] = t.x;
+			tangent[index * 3 + 1] = t.y;
+			tangent[index * 3 + 2] = t.z;
+
+			bitangent[index * 3 + 0] = b.x;
+			bitangent[index * 3 + 1] = b.y;
+			bitangent[index * 3 + 2] = b.z;
+
+
+			std::cout << "Tangent: (" <<t.x <<", " << t.y << ", " << t.z << ") \n";
+			std::cout << "Bitangent: (" <<b.x <<", " << b.y << ", " << b.z << ") \n";
+		}
+
+		std::cout << "\n";
+	}
+
+
+}
+
+
+
+
 
 void checkShaderCompileError(GLint shaderID)
 {
@@ -319,8 +385,8 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	{
 		//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 		// Reload shaders
-		std::string vertex_shader_str = readFile("../Lab3/lab3-2_vs.glsl");
-		std::string fragment_shader_str = readFile("../Lab3/lab3-2_fs.glsl");
+		std::string vertex_shader_str = readFile("../Lab3/lab3-3_vs.glsl");
+		std::string fragment_shader_str = readFile("../Lab3/lab3-3_fs.glsl");
 		const char *vertex_shader_src = vertex_shader_str.c_str();
 		const char *fragment_shader_src = fragment_shader_str.c_str();
 
@@ -404,6 +470,23 @@ int main(int argc, char const *argv[])
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_w, image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+	//normal map
+	GLuint texture_normal;
+	glGenTextures(1, &texture_normal);
+	glActiveTexture(GL_TEXTURE2);
+	glBindTexture(GL_TEXTURE_2D, texture_normal);
+	image_file =
+		lodepng_decode32_file(&image_data, &image_w, &image_h,
+			"../common/data/numberline_nmap_hires.png");
+	std::cout << "Read " << image_h << " x " << image_w << " image\n";
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_w, image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+
 
 
 	//Cube map
@@ -486,6 +569,24 @@ int main(int argc, char const *argv[])
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_bunny);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(faces), faces, GL_STATIC_DRAW);
 
+	float* tangent = new float[sizeof(points) / sizeof(float)];
+	float* bitangent = new float[sizeof(points) / sizeof(float)];
+
+	calcTangentspace(faces, sizeof(faces) / sizeof(unsigned int) / 3, points, uv_coords, tangent, bitangent);
+	
+	GLuint VBO_tan, VBO_bitan;
+
+	glGenBuffers(1, &VBO_tan);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_tan);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(tangent), tangent, GL_STATIC_DRAW);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+	glEnableVertexAttribArray(3);
+
+	glGenBuffers(1, &VBO_bitan);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_bitan);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(bitangent), bitangent, GL_STATIC_DRAW);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+	glEnableVertexAttribArray(4);
 
 #else
 	//-----------------------------------------------------------------------------------------------
@@ -566,17 +667,36 @@ int main(int argc, char const *argv[])
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_bunny);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, shapes[0].mesh.indices.size() * sizeof(unsigned int), &shapes[0].mesh.indices[0], GL_STATIC_DRAW);
 
+
+
+	float* tangent = new float[shapes[0].mesh.positions.size()];
+	float* bitangent = new float[shapes[0].mesh.positions.size()];
+	calcTangentspace(&shapes[0].mesh.indices[0], shapes[0].mesh.indices.size() / 3, &shapes[0].mesh.positions[0], &shapes[0].mesh.texcoords[0], tangent, bitangent);
+
+	GLuint VBO_tan, VBO_bitan;
+
+	glGenBuffers(1, &VBO_tan);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_tan);
+	glBufferData(GL_ARRAY_BUFFER, shapes[0].mesh.positions.size() * sizeof(float), tangent, GL_STATIC_DRAW);
+	glVertexAttribPointer(3, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+	glEnableVertexAttribArray(3);
+
+	glGenBuffers(1, &VBO_bitan);
+	glBindBuffer(GL_ARRAY_BUFFER, VBO_bitan);
+	glBufferData(GL_ARRAY_BUFFER, shapes[0].mesh.positions.size() * sizeof(float), bitangent, GL_STATIC_DRAW);
+	glVertexAttribPointer(4, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 3, (void*)0);
+	glEnableVertexAttribArray(4);
+
 #endif
 
-
-
+	
 
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	// load and compile shaders  "../lab1-6_vs.glsl" and "../lab1-6_fs.glsl"
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
-	std::string vertex_shader_str = readFile("../Lab3/lab3-2_vs.glsl");
-	std::string fragment_shader_str = readFile("../Lab3/lab3-2_fs.glsl");
+	std::string vertex_shader_str = readFile("../Lab3/lab3-3_vs.glsl");
+	std::string fragment_shader_str = readFile("../Lab3/lab3-3_fs.glsl");
 	const char *vertex_shader_src = vertex_shader_str.c_str();
 	const char *fragment_shader_src = fragment_shader_str.c_str();
 
@@ -627,6 +747,7 @@ int main(int argc, char const *argv[])
 	const GLchar* ls = "light_strength";
 	const GLchar* tex = "texture_diffuse";
 	const GLchar* texEnv = "texture_environment";
+	const GLchar* texn = "texture_normal";
 	const GLchar* refl = "r";
 
 
@@ -793,6 +914,7 @@ int main(int argc, char const *argv[])
 		glUniform4fv(glGetUniformLocation(shader_program, ls), 1, (GLfloat*)&light_strength[0]);
 		glUniform1i(glGetUniformLocation(shader_program, tex), 0);
 		glUniform1i(glGetUniformLocation(shader_program, texEnv), 1);
+		glUniform1i(glGetUniformLocation(shader_program, texn), 2);
 
 
 

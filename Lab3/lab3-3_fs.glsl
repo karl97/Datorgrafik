@@ -4,6 +4,8 @@ out vec4 frag_colour;
 in vec4 normal;
 in vec4 position;
 in vec2 uv_coords;
+in vec4 tangent;
+in vec4 bitangent;
 
 uniform int light_count;
 uniform vec4 light_position[4]; // can have up to 4 light sources
@@ -23,6 +25,7 @@ uniform vec4 light_strength;
 uniform float r;
 
 uniform sampler2D texture_diffuse;
+uniform sampler2D texture_normal;
 uniform samplerCube texture_environment;
 
 vec4 diffuse_brdf() // lambertian diffuse lightning
@@ -114,7 +117,15 @@ void main () {
   frag_colour = vec4(0);
   vec4 f0 = f0_var; 
   float alpha = alpha_var; // alpha parameter for D function
-  vec4 n = normalize(normal);
+  //vec4 n = normalize(normal);
+
+
+  vec4 tan = tangent;//vec4(1, 0,0,0);
+  vec4 bitan = bitangent;//vec4(0, 1,0,0);
+  
+  vec4 texn=normalize(vec4(texture(texture_normal, uv_coords).xyz * 2 - 1, 0));
+  mat4 TBN = mat4(normalize(tan), normalize(bitan), normalize(normal), vec4(0,0,0,1));  vec4 n = normalize(TBN * texn);
+  
   vec4 outdir = normalize(position - eyepos);
   vec3 refl = reflect(outdir.xyz, n.xyz);
   vec4 texEnv = texture(texture_environment, refl);
