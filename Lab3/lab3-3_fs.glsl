@@ -117,14 +117,15 @@ void main () {
   frag_colour = vec4(0);
   vec4 f0 = f0_var; 
   float alpha = alpha_var; // alpha parameter for D function
-  //vec4 n = normalize(normal);
+  vec4 n = normalize(normal);
+  n.xy = n.xy * -1.0;
 
 
   vec4 tan = tangent;//vec4(1, 0,0,0);
   vec4 bitan = bitangent;//vec4(0, 1,0,0);
   
   vec4 texn=normalize(vec4(texture(texture_normal, uv_coords).xyz * 2 - 1, 0));
-  mat4 TBN = mat4(normalize(tan), normalize(bitan), normalize(normal), vec4(0,0,0,1));  vec4 n = normalize(TBN * texn);
+  mat4 TBN = mat4(normalize(tan), normalize(bitan), n, vec4(0,0,0,1));  n = normalize(TBN * texn);
   
   vec4 outdir = normalize(position - eyepos);
   vec3 refl = reflect(outdir.xyz, n.xyz);

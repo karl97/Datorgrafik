@@ -1,5 +1,5 @@
 #define USE_TEST_ENV 0
-#define USE_OBJ 1
+#define USE_OBJ 0
 
 #if USE_OBJ
 

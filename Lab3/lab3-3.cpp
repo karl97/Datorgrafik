@@ -276,7 +276,7 @@ void invertMatrix(float(*C)[4], float(*A)[4])
 	//and the last row is the same
 }
 
-void calcTangentspace(unsigned int* faces, int numFaces, float* points, float* uv_coords, float* tangent,float* bitangent) {
+void calcTangentspace(unsigned int* faces, int numFaces, float* points, float* uvs, float* tangent,float* bitangent) {
 	int temp = 1;
 	for (int i = 0; i < numFaces; i++) {
 		glm::vec3 pos[3];
@@ -286,7 +286,7 @@ void calcTangentspace(unsigned int* faces, int numFaces, float* points, float* u
 		for (int k = 0; k < 3; k++) {
 			int index = faces[i * 3 + k];
 			pos[k] = glm::vec3(points[index * 3], points[index * 3 + 1], points[index * 3 + 2]);
-			uv[k] = glm::vec2(points[index * 2], points[index * 2 + 1]);
+			uv[k] = glm::vec2(uvs[index * 2], uvs[index * 2 + 1]);
 			std::cout << "["<< index << "] ";
 		}
 		std::cout << "\n";
@@ -297,6 +297,7 @@ void calcTangentspace(unsigned int* faces, int numFaces, float* points, float* u
 		double dx = (double)(f1.x)*(double)(f2.y);
 		double dy = (double)(f2.x)*(double)(f1.y);
 		float r = dx - dy;
+		float f = 1.0f / (f1.x*f2.y - f2.x*f1.y);
 		
 
 		int x = 0;
@@ -315,6 +316,7 @@ x = 2;
 		std::cout << "dx: " << dx << " \n";
 		std::cout << "dy: " << dy << " \n";
 		std::cout << "r: " << r << " \n";
+		std::cout << "f: " << f << " \n";
 
 		glm::vec3 t = (f2.y*e1 - f1.y*e2) / r;
 		glm::vec3 b = (f1.x*e2 - f2.x*e1) / r;
@@ -569,8 +571,10 @@ int main(int argc, char const *argv[])
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO_bunny);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(faces), faces, GL_STATIC_DRAW);
 
-	float* tangent = new float[sizeof(points) / sizeof(float)];
-	float* bitangent = new float[sizeof(points) / sizeof(float)];
+	float tangent[sizeof(points) / sizeof(float)];
+	float bitangent[sizeof(points) / sizeof(float)];
+
+	std::cout << "Faces: " << sizeof(faces) / sizeof(unsigned int) / 3 << " Size of tangent: " << sizeof(tangent) << " Array size: " << sizeof(points) / sizeof(float) << "\n";
 
 	calcTangentspace(faces, sizeof(faces) / sizeof(unsigned int) / 3, points, uv_coords, tangent, bitangent);
 	
