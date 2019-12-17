@@ -12,7 +12,7 @@ out vec3 tcPosition[];
 out vec2 tcTexCoord[];
 
 // Try different levels here!
-float TessLevelInner = 64;
+float TessLevelInner = 1;
 float TessLevelOuter = 1;
 
 
