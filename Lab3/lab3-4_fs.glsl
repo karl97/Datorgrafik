@@ -109,18 +109,18 @@ vec4 CT_brdf(vec4 normal, vec4 indir, vec4 outdir, vec4 f0, float alpha, float l
 }
 
 
+in vec3 col;
 
+void main () 
+{
 
-void main () {
-	frag_colour = vec4(1.0, 0.0, 1.0, 1.0);
-
-	return;
   vec4 diffuse_colour = bunny_colour;
   vec4 tex = texture(texture_diffuse, teTexCoord);
   frag_colour = vec4(0);
   vec4 f0 = f0_var; 
   float alpha = alpha_var; // alpha parameter for D function
   vec4 n = normalize(teNormal);
+  /*
   n.xy = n.xy * -1.0;
 
 
@@ -128,8 +128,9 @@ void main () {
   vec4 bitan = vec4(0, 1,0,0);
   
   vec4 texn=normalize(vec4(texture(texture_normal, teTexCoord).xyz * 2 - 1, 0));
-  mat4 TBN = mat4(normalize(tan), normalize(bitan), n, vec4(0,0,0,1));  n = normalize(TBN * texn);
-  
+  mat4 TBN = mat4(normalize(tan), normalize(bitan), n, vec4(0,0,0,1));
+  n = normalize(TBN * texn);
+  */
   vec4 outdir = normalize(tePosition - eyepos);
   vec3 refl = reflect(outdir.xyz, n.xyz);
   vec4 texEnv = texture(texture_environment, refl);
@@ -146,5 +147,6 @@ void main () {
 	
 	}
 	frag_colour = r * texEnv + (1.0 - r) * frag_colour;
-	frag_colour = vec4((n.xyz+ 1.0) /2.0, 1.0);
+	//frag_colour = vec4((n.xyz+ 1.0) /2.0, 1.0);
+	//frag_colour = vec4(teTexCoord,0,1);
 }

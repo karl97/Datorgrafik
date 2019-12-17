@@ -482,17 +482,6 @@ int main(int argc, char const *argv[])
 
 
 
-	//Cube map
-	GLuint texture_environment;
-	glGenTextures(1, &texture_environment);
-	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_environment);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
-
 	//Height map
 	GLuint texture_height;
 	glGenTextures(1, &texture_height);
@@ -509,6 +498,19 @@ int main(int argc, char const *argv[])
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_w, image_h, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+	
+	
+	//Cube map
+	GLuint texture_environment;
+	glGenTextures(1, &texture_environment);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_environment);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_R, GL_CLAMP_TO_EDGE);
+
 
 #if USE_TEST_ENV
 	const char* cubeMapSides[6] = {
@@ -983,7 +985,7 @@ int main(int argc, char const *argv[])
 
 		{
 			glUniform1f(glGetUniformLocation(shader_program, offset), -offset_value);
-			glDrawElements(GL_TRIANGLES,
+			glDrawElements(GL_PATCHES,
 				shapes[0].mesh.indices.size(),
 				GL_UNSIGNED_INT,
 				0);
@@ -993,7 +995,7 @@ int main(int argc, char const *argv[])
 		{
 
 			glUniform1f(glGetUniformLocation(shader_program, offset), +offset_value);
-			glDrawElements(GL_TRIANGLES,
+			glDrawElements(GL_PATCHES,
 				shapes[0].mesh.indices.size(),
 				GL_UNSIGNED_INT,
 				0);

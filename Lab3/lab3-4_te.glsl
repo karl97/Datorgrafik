@@ -15,6 +15,8 @@ out vec2 teTexCoord;
 out vec4 tangent;
 out vec4 bitangent;
 
+out vec3 col;
+
 // This is our displacement map
 uniform sampler2D heightmap;
 
@@ -43,7 +45,7 @@ vec4 gaussian_sample(const sampler2D tex, const vec2 uv, const float radius, con
 }
 
 //const float sample_offset = 0.02;
-//const float displacement_coef = -0.1;
+const float displacement_coef = -0.1;
 
 void main()
 {
@@ -51,27 +53,32 @@ void main()
   // 1. Compute interpolated Position and TexCoord using gl_TessCoord
   // with tcPosition and tcTexCoord, respectively.
 
-	vec4 tmpPosition = vec4(normalize(gl_TessCoord.x * tcPosition[0] + gl_TessCoord.y * tcPosition[1] + gl_TessCoord.z * tcPosition[2]), 1.0);
+	vec4 tmpPosition = vec4(gl_TessCoord.x * tcPosition[0] + gl_TessCoord.y * tcPosition[1] + gl_TessCoord.z * tcPosition[2], 1.0);
     
-	teTexCoord = normalize(gl_TessCoord.x * tcTexCoord[0] + gl_TessCoord.y * tcTexCoord[1] + gl_TessCoord.z * tcTexCoord[2]);
+	teTexCoord = gl_TessCoord.x * tcTexCoord[0] + gl_TessCoord.y * tcTexCoord[1] + gl_TessCoord.z * tcTexCoord[2];
 
 
   // 2. Compute the normal for the triangle that connects tcPosition[]
-	
-	teNormal = vec4(normalize(cross(tcPosition[1]-tcPosition[0], tcPosition[2] - tcPosition[0])), 1.0);
+	vec4 normal = vec4(normalize(cross(tcPosition[1]-tcPosition[0], tcPosition[2] - tcPosition[0])), 0.0);
+	teNormal = m*normal;
 
   // 3. Compute the amount of displacement for the vertex by using the
   // sampler2D heightmap
-
-  // tmpPosition += d*normal; 
+  //vec4  gaussian_sample(heightmap, teTexCoord, const float radius, const vec2 a, const vec2 b)
+  float d = displacement_coef * texture(heightmap,teTexCoord).x;
+   tmpPosition += d*normal; 
 
   // 4a. Select 2 other texture coordinates and compute the
   // displacement at those points.
+
   
   // 4b. Use the three displaced points to compute a new normal, and
   // put it in teNormal;
 
+
+
   // 5. Now apply transformations  
   gl_Position = mvp * tmpPosition;
   tePosition = m*tmpPosition;
+  col = gl_TessCoord;
 }
