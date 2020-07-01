@@ -44,9 +44,15 @@ vec4 gaussian_sample(const sampler2D tex, const vec2 uv, const float radius, con
     (1.0/16.0) * texture(tex,uv - a*ts.x - b*ts.y);
 }
 
-const float sample_offset = 0.02;
-const float sample_offset2 = 0.001;
-const float displacement_coef = -0.1;
+//const float sample_offset = 0.02;
+//const float sample_offset2 = 0.001;
+//const float displacement_coef = -0.1;
+
+uniform float sample_offset; 
+uniform float sample_offset2;
+uniform float displacement_coef;
+
+
 
 void main()
 {

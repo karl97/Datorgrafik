@@ -451,7 +451,8 @@ int main(int argc, char const *argv[])
 	GLuint texture_handle;
 	glGenTextures(1, &texture_handle);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_handle);
+	glBindTexture(GL_TEXTURE_2D, texture_handle);
+
 	image_file =
 		lodepng_decode32_file(&image_data, &image_w, &image_h,
 			"../common/data/numberline_hires.png");
@@ -467,7 +468,8 @@ int main(int argc, char const *argv[])
 	GLuint texture_normal;
 	glGenTextures(1, &texture_normal);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, texture_normal);
+	glBindTexture(GL_TEXTURE_2D, texture_normal);
+
 	image_file =
 		lodepng_decode32_file(&image_data, &image_w, &image_h,
 			"../common/data/numberline_nmap_hires.png");
@@ -486,7 +488,8 @@ int main(int argc, char const *argv[])
 	GLuint texture_height;
 	glGenTextures(1, &texture_height);
 	glActiveTexture(GL_TEXTURE3);
-	glBindTexture(GL_TEXTURE_2D, texture_height);
+	glBindTexture(GL_TEXTURE_2D, texture_height);
+
 	image_file =
 		lodepng_decode32_file(&image_data, &image_w, &image_h,
 			"../common/data/numberline_df_inv.png");
@@ -504,7 +507,8 @@ int main(int argc, char const *argv[])
 	GLuint texture_environment;
 	glGenTextures(1, &texture_environment);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_environment);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_environment);
+
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -829,6 +833,10 @@ int main(int argc, char const *argv[])
 	//bool show_another_window = false;
 
 
+	float sample_offset = 0.02;
+	float sample_offset2 = 0.001;
+	float displacement_coef = -0.1;
+
 	glfwSwapInterval(1);
 
 	glClearColor(0.0f, 0.0f, 1.0f, 1.0f);
@@ -895,6 +903,10 @@ int main(int argc, char const *argv[])
 			ImGui::Text("Application average %.3f ms/frame (%.1f FPS)", 1000.0f / ImGui::GetIO().Framerate, ImGui::GetIO().Framerate);
 		}
 
+		ImGui::Text("Tesselation shader parameters:");
+		ImGui::DragFloat("Sample_offset:", &sample_offset, 0.00001f, 0.00001f, 10.0f);
+		ImGui::DragFloat("Sample_offset2:", &sample_offset2, 0.00001f, 0.00001f, 10.0f);
+		ImGui::DragFloat("displacement_coef:", &displacement_coef, 0.00001f, -3.0f, 3.0f);
 
 
 		//Our stuff
@@ -956,6 +968,10 @@ int main(int argc, char const *argv[])
 		glUniform1i(glGetUniformLocation(shader_program, texEnv), 1);
 		glUniform1i(glGetUniformLocation(shader_program, texn), 2);
 		glUniform1i(glGetUniformLocation(shader_program, texh), 3);
+
+		glUniform1f(glGetUniformLocation(shader_program, "sample_offset"), sample_offset);
+		glUniform1f(glGetUniformLocation(shader_program, "sample_offset2"), sample_offset2);
+		glUniform1f(glGetUniformLocation(shader_program, "displacement_coef"), displacement_coef);
 
 
 

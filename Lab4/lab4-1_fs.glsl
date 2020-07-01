@@ -165,14 +165,29 @@ float intersect(Ray ray, Sphere s)
 {
 	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------.
 	// Return closest distance t for a ray/sphere intersection.
-	return 0;
+	float a = dot(ray.dir, ray.dir);
+	vec3 v = ray.origin - s.center;
+	float b = 2 * dot(ray.dir, v);
+	float c = dot(v, v) - s.radius*s.radius;
+	float x = sqrt(b*b - 4 * a * c);
+	
+	float t1 = (- b - x) / 2 * a;
+	float t2 = (- b + x) / 2 * a;
+
+	float t = t1;
+	if(t2 < t1) t = t2;
+
+	return t;
 }
 
 float intersect(Ray ray, Plane p) 
 {
 	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------
 	// Return closest distance t for a ray/plane intersection.
-	return 0;
+
+	float t=(p.offset - dot(p.normal,ray.origin))/dot(p.normal,ray.dir);
+
+	return t;
 }
 
 
@@ -197,24 +212,13 @@ Intersection intersect( Ray ray)
 	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------
 	// Populate I with all the relevant data.  `id` is the closest
 	// sphere that was hit, and `t` is the distance to it.
-	/*
-		struct Ray 
-		{
-			vec3 origin, dir;
-		};
-		struct Intersection
-		{
-			vec3 point;
-			vec3 normal;
-			Material material;
-		};
-		struct Sphere
-		{
-			float radius;
-			vec3 center;
-			Material material;
-		};
-	*/
+	if(id != -1)
+	{
+		I.point = ray.origin + t * ray.dir;
+		I.normal = normalize(I.point - scene.spheres[id].center);
+		I.material = scene.spheres[id].material;
+	}
+
 
 	//Check for intersection with planes
 	{
@@ -222,10 +226,11 @@ Intersection intersect( Ray ray)
 		if (d>0 && d<=t)
 		{
 			t=d;
-
 			// YOUR CODE GOES HERE -------------------------------------------------------------------------------------
 			// Populate I with all the relevant data.
-      
+			I.point = ray.origin + t * ray.dir;
+			I.normal = scene.ground_plane[0].normal;
+			I.material = scene.ground_plane[0].material;
 			// Adding a procedural checkerboard texture:
 			I.material.color_diffuse = (mod(floor(I.point.x) + floor(I.point.z),2.0) == 0.0) ?
 			scene.ground_plane[0].material.color_diffuse :
@@ -238,7 +243,7 @@ Intersection intersect( Ray ray)
 	{
 		I.point = ray.dir*t;
 		I.normal = -ray.dir;
-		vec3 sky = simple_sky(ray.dir); // pick color from sky function
+		vec3 sky = simple_sky(ray.dir); // pick color from sk y function
 
 		// Sky is all emission, no diffuse or glossy shading:
 		I.material.color_diffuse = 0 * sky; 
@@ -265,6 +270,7 @@ vec3 raycast(Ray ray)
   // position/normal/material data stored in isec; and
   // i_light_position, which is a point light source at the sun.
   color = isec.material.color_diffuse + isec.material.color_emission;
+  //color = color * dot(-ray.dir, isec.normal);
   
   return color;
 }
@@ -288,9 +294,10 @@ void main() {
 
 	Ray ray;
 	ray.origin = i_position;
+
 	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------: 
 	// Compute the correct ray direction using gl_fragCoord and the camera vectors above.
-	ray.dir = vec3(0,-1,0);
+	ray.dir = normalize(cz*f_dist + uv.x*cx + uv.y*cy);
 	
 	vec3 color = raycast(ray);
 	

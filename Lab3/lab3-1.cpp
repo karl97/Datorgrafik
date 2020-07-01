@@ -304,7 +304,8 @@ int main(int argc, char const *argv[])
 	GLuint texture_handle;
 	glGenTextures(1, &texture_handle);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_handle);
+	glBindTexture(GL_TEXTURE_2D, texture_handle);
+
 	unsigned char* image_data;
 	unsigned image_w;
 	unsigned image_h;

@@ -460,7 +460,8 @@ int main(int argc, char const *argv[])
 	GLuint texture_handle;
 	glGenTextures(1, &texture_handle);
 	glActiveTexture(GL_TEXTURE0);
-	glBindTexture(GL_TEXTURE_2D, texture_handle);
+	glBindTexture(GL_TEXTURE_2D, texture_handle);
+
 	image_file =
 		lodepng_decode32_file(&image_data, &image_w, &image_h,
 			"../common/data/numberline_hires.png");
@@ -476,7 +477,8 @@ int main(int argc, char const *argv[])
 	GLuint texture_normal;
 	glGenTextures(1, &texture_normal);
 	glActiveTexture(GL_TEXTURE2);
-	glBindTexture(GL_TEXTURE_2D, texture_normal);
+	glBindTexture(GL_TEXTURE_2D, texture_normal);
+
 	image_file =
 		lodepng_decode32_file(&image_data, &image_w, &image_h,
 			"../common/data/numberline_nmap_hires.png");
@@ -495,7 +497,8 @@ int main(int argc, char const *argv[])
 	GLuint texture_environment;
 	glGenTextures(1, &texture_environment);
 	glActiveTexture(GL_TEXTURE1);
-	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_environment);
+	glBindTexture(GL_TEXTURE_CUBE_MAP, texture_environment);
+
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_CUBE_MAP, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
@@ -813,14 +816,14 @@ int main(int argc, char const *argv[])
 			static float f = 0.0f;
 			static int counter = 0;
 			ImGui::Text("Cook-Torrance");                           // Display some text (you can use a format string too)
-			ImGui::InputFloat("alpha", &alpha);
+			ImGui::DragFloat("alpha", &alpha, 0.1f);
 			ImGui::ColorEdit3("f0", (float*)&f0);
 			ImGui::SliderFloat("specular-lambertian", &slider_scale, 0.0f, 1.0f);
 
 			ImGui::Text("Blinn-phong");
-			ImGui::InputFloat("kl", &kl_var);
-			ImGui::InputFloat("kg", &kg_var);
-			ImGui::InputFloat("f", &f_var);
+			ImGui::DragFloat("kl", &kl_var, 0.1f);
+			ImGui::DragFloat("kg", &kg_var, 0.1f);
+			ImGui::DragFloat("f", &f_var, 0.1f);
 
 
 
