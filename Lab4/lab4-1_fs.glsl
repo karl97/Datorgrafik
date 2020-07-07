@@ -312,7 +312,6 @@ void main() {
 	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------: 
 	// Compute the correct ray direction using gl_fragCoord and the camera vectors above.
 	ray.dir = normalize(cz*f_dist + uv.x*cx + uv.y*cy);
-	vec3 dir = ray.dir;
 	vec3 color = raycast(ray);
 
 	//linear blend, will look terrible

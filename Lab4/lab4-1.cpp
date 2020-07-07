@@ -16,6 +16,7 @@
 #define M_PI 3.14159265359
 #endif
 
+#define LAB4_1
 #include "local_config.h"
 
 

@@ -6,8 +6,20 @@
 #define VERTEX_SHADER_SOURCE "../Lab4/lab4_vs.glsl"
 
 #else
-
+#if defined(LAB4_1)
 #define FRAGMENT_SHADER_SOURCE "../Lab4/lab4-1_fs.glsl"
+
+#elif defined(LAB4_2)
+#define FRAGMENT_SHADER_SOURCE "../Lab4/lab4-2_fs.glsl"
+
+#elif defined(LAB4_3)
+#define FRAGMENT_SHADER_SOURCE "../Lab4/lab4-2_fs.glsl"
+
+#elif defined(LAB4_4)
+#define FRAGMENT_SHADER_SOURCE "../Lab4/lab4-2_fs.glsl"
+
+#endif
+
 #define VERTEX_SHADER_SOURCE "../Lab4/lab4_vs.glsl"
 
 
