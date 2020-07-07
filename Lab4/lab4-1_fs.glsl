@@ -89,7 +89,7 @@ void init( float sun_bright )
 	scene.spheres[1].radius = 0.3;
 	scene.spheres[1].material.color_diffuse = 0.5 * vec3( 0.0, 1.0, 0.0 );
 	scene.spheres[1].material.color_glossy = vec3( 1 );
-	scene.spheres[1].material.roughness = 10000;
+	scene.spheres[1].material.roughness = 10;
 	scene.spheres[1].material.color_emission = vec3( 0 );
 	scene.spheres[1].material.reflection = 0.1;
 	scene.spheres[1].material.transmission = 0.8;
@@ -258,6 +258,15 @@ Intersection intersect( Ray ray)
 	return I;
 }
 
+
+vec3 BP_brdf(float kl, float kg, float f, vec3 indir, vec3 normal, vec3 outdir) // the Blinn-Phong brdf 
+{
+
+	vec3 h=normalize(outdir+indir);
+
+	return vec3(kl/3.14) + vec3(((8+f)/(8*3.14)))*kg*pow(dot(normal,h),f);
+}
+
 vec3 raycast(Ray ray) 
 {
   vec3 color = vec3(0);
@@ -269,9 +278,14 @@ vec3 raycast(Ray ray)
   // the one below!  Compute the shading, using the
   // position/normal/material data stored in isec; and
   // i_light_position, which is a point light source at the sun.
-  color = isec.material.color_diffuse + isec.material.color_emission;
-  //color = color * dot(-ray.dir, isec.normal);
+
+  vec3 light_in = -normalize(isec.point - scene.sun_position);
+  vec3 light_out = -normalize(ray.dir);
+  vec3 normal = normalize(isec.normal);
   
+//  color = isec.material.color_diffuse + isec.material.color_emission;
+  color = isec.material.color_diffuse * BP_brdf(1, 3.0, isec.material.roughness, light_in, normal, light_out) * max(0, dot(light_in, normal)) + isec.material.color_emission;
+
   return color;
 }
 
@@ -298,9 +312,9 @@ void main() {
 	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------: 
 	// Compute the correct ray direction using gl_fragCoord and the camera vectors above.
 	ray.dir = normalize(cz*f_dist + uv.x*cx + uv.y*cy);
-	
+	vec3 dir = ray.dir;
 	vec3 color = raycast(ray);
-	
+
 	//linear blend, will look terrible
 	// o_fragment_color =  vec4((color),1);
 
@@ -310,5 +324,4 @@ void main() {
 	///\todo REMOVE THIS LINE after you have the triangles set up
 	//o_fragment_color = vec4(1,0.9,0.8,1); 
 }
-
 
