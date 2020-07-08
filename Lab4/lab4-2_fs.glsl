@@ -326,8 +326,20 @@ vec3 raytrace()
         // direction. Otherwise, use the block below for specular
         // reflection.
 
-	      // Ray ray2 = ray;
-	      // push( ray2 );
+	      Ray ray2 = ray;
+	      ray2.weight = ray.weight * isec.material.transmission;
+		  if(dot(ray.dir, isec.normal) > 0)
+		  {
+			ray2.dir = refract(ray.dir, isec.normal, isec.material.ior / 1.0);
+		  }
+		  else
+		  {
+			ray2.dir = refract(ray.dir, isec.normal, 1.0 / isec.material.ior);
+		  }
+
+		  ray2.origin = isec.point + ray2.dir * 0.0001;
+
+		  push( ray2 );
 
       }
       
