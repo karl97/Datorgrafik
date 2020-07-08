@@ -220,7 +220,7 @@ Intersection intersect( Ray ray)
 
   //COPY YOUR CODE FROM 4.1 HERE
   // Manage intersections
-float t = 1e32;
+	float t = 1e32;
 	int id = -1;
     
 	//Check for intersection with spheres 
@@ -284,6 +284,14 @@ float t = 1e32;
 	return I;
 }
 
+vec3 BP_brdf(float kl, float kg, float f, vec3 indir, vec3 normal, vec3 outdir) // the Blinn-Phong brdf 
+{
+
+	vec3 h=normalize(outdir+indir);
+
+	return vec3(kl/3.14) + vec3(((8+f)/(8*3.14)))*kg*pow(dot(normal,h),f);
+}
+
 vec3 raytrace() 
 {
   vec3 ambient = 0.2 * simple_sky(vec3(0,1,0));   // global ambient light
@@ -328,8 +336,12 @@ vec3 raytrace()
         // YOUR TASK: Create new ray, compute its position, direction,
         // and weight, and call push(ray).
 
-	      // Ray ray2 = ray;
-	      // push( ray2 );
+	      Ray ray2 = ray;
+	      ray2.weight = ray.weight * isec.material.reflection;
+		  ray2.dir = reflect(ray.dir, isec.normal);
+		  ray2.origin = isec.point + ray2.dir * 0.0001;
+		  
+		  push( ray2 );
 
       }
 
@@ -337,18 +349,35 @@ vec3 raytrace()
       // Now handle non-specular scattering (i.e., the non-recursive case)
       {
 
+		color += this_color;
         // YOUR TASK: Create a "shadow feeler" ray and check if this
         // point is visible from the (single) light source.
         // If it is in shadow, set a black (or dark "ambient") colour.
+		Ray shadow_feeler;
+		shadow_feeler.origin = isec.point + isec.normal * 0.0001;
+		shadow_feeler.dir = normalize(i_light_position - isec.point);
+		Intersection shadow_feeler_isec = intersect(shadow_feeler);
 
+		vec3 light_in = shadow_feeler.dir;
+		vec3 light_out = -normalize(ray.dir);
+		if(length(shadow_feeler_isec.point) <= 1e20)
+		{
+			//In shadow: Color with ambient light
+			color += ray.weight * ambient* (isec.material.color_diffuse * BP_brdf(1, 0, 0, light_in, isec.normal, light_out) * max(0, dot(light_in, isec.normal)) + isec.material.color_emission);
+		}
+		else
+		{
+			//Not in shadow: Show highlights
+			color += ray.weight * (isec.material.color_diffuse * BP_brdf(1, 3.0, isec.material.roughness, light_in, isec.normal, light_out) * max(0, dot(light_in, isec.normal)) + isec.material.color_emission);
+		}
 
         // YOUR TASK: If the point is not in shadow, compute the
         // colour here (using your BRDF, as before).
         
             
-        color += this_color;
+        
 
-        color = isec.material.color_diffuse + isec.material.color_emission;
+        
       }
 
 
@@ -375,8 +404,6 @@ void main() {
 
     //COPY YOUR CODE FROM 4.1 HERE
     // Create a ray
-    int num_samples=1;
-
 		
 	//crude zooming by pressing right mouse button
 	float f_dist = i_focal_dist + i_focal_dist*i_mouse_state.w; 
@@ -384,9 +411,12 @@ void main() {
 	//basis for defining the image plane
 	vec3 cx = i_right;
 	vec3 cy = i_up;   
-	vec3 cz = i_dir;  
+	vec3 cz = i_dir; 
+	
+	//scene.spheres[2].center = i_position; //Controll the red glowing sphere
 
 	ray.origin = i_position;
+	ray.weight = 1;
 
 	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------: 
 	// Compute the correct ray direction using gl_fragCoord and the camera vectors above.

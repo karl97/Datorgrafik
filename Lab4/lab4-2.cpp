@@ -162,6 +162,7 @@ static void mouse_button_callback(GLFWwindow* window, int button, int action, in
 
     if (button == GLFW_MOUSE_BUTTON_RIGHT && action == GLFW_RELEASE)
         mouse_state.w = 0;
+    frame_count = 0;
 }
 
 static void framebuffer_size_callback(GLFWwindow* window, int width, int height)
