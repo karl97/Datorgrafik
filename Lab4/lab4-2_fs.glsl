@@ -189,14 +189,28 @@ vec3 simple_sky(vec3 direction)
 float intersect(Ray ray, Sphere s) 
 {
   //COPY YOUR CODE FROM 4.1 HERE
-  return 0;
+  float a = dot(ray.dir, ray.dir);
+	vec3 v = ray.origin - s.center;
+	float b = 2 * dot(ray.dir, v);
+	float c = dot(v, v) - s.radius*s.radius;
+	float x = sqrt(b*b - 4 * a * c);
+	
+	float t1 = (- b - x) / 2 * a;
+	float t2 = (- b + x) / 2 * a;
+
+	float t = t1;
+	if(t2 < t1) t = t2;
+
+	return t;
 }
 
 // Ray-plane intersection
 float intersect(Ray ray, Plane p) 
 {
   //COPY YOUR CODE FROM 4.1 HERE
-  return 0;
+  float t=(p.offset - dot(p.normal,ray.origin))/dot(p.normal,ray.dir);
+
+	return t;
 }
 
 // Check for intersection of a ray and all objects in the scene
@@ -206,14 +220,73 @@ Intersection intersect( Ray ray)
 
   //COPY YOUR CODE FROM 4.1 HERE
   // Manage intersections
+float t = 1e32;
+	int id = -1;
+    
+	//Check for intersection with spheres 
+	// Find the closest intersection.
+	for (int i = 0; i < NUM_SPHERES; ++i)
+	{
+		float d = intersect(ray, scene.spheres[i]);
+		if (d>0 && d<=t)
+		{
+			t = d; 
+			id = i;
+		}
+	}
+
+	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------
+	// Populate I with all the relevant data.  `id` is the closest
+	// sphere that was hit, and `t` is the distance to it.
+	if(id != -1)
+	{
+		I.point = ray.origin + t * ray.dir;
+		I.normal = normalize(I.point - scene.spheres[id].center);
+		I.material = scene.spheres[id].material;
+	}
 
 
-  return I;
+	//Check for intersection with planes
+	{
+		float d = intersect(ray,scene.ground_plane[0]);
+		if (d>0 && d<=t)
+		{
+			t=d;
+			// YOUR CODE GOES HERE -------------------------------------------------------------------------------------
+			// Populate I with all the relevant data.
+			I.point = ray.origin + t * ray.dir;
+			I.normal = scene.ground_plane[0].normal;
+			I.material = scene.ground_plane[0].material;
+			// Adding a procedural checkerboard texture:
+			I.material.color_diffuse = (mod(floor(I.point.x) + floor(I.point.z),2.0) == 0.0) ?
+			scene.ground_plane[0].material.color_diffuse :
+			vec3(1.0) - scene.ground_plane[0].material.color_diffuse;
+		}
+	}
+
+	//If no sphere or plane hit, we hit the sky instead
+	if (t>1e20)
+	{
+		I.point = ray.dir*t;
+		I.normal = -ray.dir;
+		vec3 sky = simple_sky(ray.dir); // pick color from sk y function
+
+		// Sky is all emission, no diffuse or glossy shading:
+		I.material.color_diffuse = 0 * sky; 
+		I.material.color_glossy = 0.0 * vec3( 1 );
+		I.material.roughness = 1;
+		I.material.color_emission = 0.3 * sky;
+		I.material.reflection = 0.0;
+		I.material.transmission = 0;
+		I.material.ior = 1;
+
+	}
+	return I;
 }
 
 vec3 raytrace() 
 {
-  vec3 ambient = 0.2 * sky(0,1,0);   // global ambient light
+  vec3 ambient = 0.2 * simple_sky(vec3(0,1,0));   // global ambient light
   vec3 color = vec3(0);
 
 
@@ -288,7 +361,7 @@ vec3 raytrace()
 void main() {
 
   vec2 tex_coords = gl_FragCoord.xy / i_window_size.xy;
-
+  vec2 uv =  gl_FragCoord.xy - 0.5*i_window_size.xy;
   if(i_display)    
   {
     o_fragment_color = texture(i_texture,tex_coords);
@@ -302,6 +375,22 @@ void main() {
 
     //COPY YOUR CODE FROM 4.1 HERE
     // Create a ray
+    int num_samples=1;
+
+		
+	//crude zooming by pressing right mouse button
+	float f_dist = i_focal_dist + i_focal_dist*i_mouse_state.w; 
+	
+	//basis for defining the image plane
+	vec3 cx = i_right;
+	vec3 cy = i_up;   
+	vec3 cz = i_dir;  
+
+	ray.origin = i_position;
+
+	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------: 
+	// Compute the correct ray direction using gl_fragCoord and the camera vectors above.
+	ray.dir = normalize(cz*f_dist + uv.x*cx + uv.y*cy);
 
     // Push the ray noto the ray stack
     push( ray );
