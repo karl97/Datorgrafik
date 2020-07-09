@@ -18,7 +18,8 @@ uniform vec3 i_light_color;
 uniform float i_focal_dist;
 
 #define NUM_SPHERES 5
-#define MAX_DEPTH 10
+#define NUM_TRIANGLES 4
+#define MAX_DEPTH 20
 #define MAX_SAMPLES 1
 
 struct Ray { vec3 origin, dir; float weight;};
@@ -80,10 +81,18 @@ struct Plane {
   Material material;
 };
 
+struct Triangle {
+  vec3 corners[3];
+  float offset;
+  vec3 normal;
+  Material material;
+};
+
 struct Scene {
 
   Sphere spheres[NUM_SPHERES];
   Plane ground_plane[1];
+  Triangle triangles[NUM_TRIANGLES];
   float sun_brightness;
 
 };
@@ -150,7 +159,7 @@ void init( )
   scene.spheres[4].material.ior = 1;
 
   scene.ground_plane[0].normal = vec3(0,1,0);
-  scene.ground_plane[0].offset = 0;
+  scene.ground_plane[0].offset = -1;
   scene.ground_plane[0].material.color_diffuse = 1.0 * vec3( 0.6 );
   scene.ground_plane[0].material.color_glossy = vec3( 0 );
   scene.ground_plane[0].material.roughness = 0;
@@ -158,6 +167,49 @@ void init( )
   scene.ground_plane[0].material.reflection = 0.0;
   scene.ground_plane[0].material.transmission = 0;
   scene.ground_plane[0].material.ior = 1;
+
+  vec3 corner_0 = vec3( 0.0, 0, 0.5);
+  vec3 corner_1 = vec3(+0.5, 1.0, 0.5);
+  vec3 corner_2 = vec3(-0.5, 1.0, 0.5);
+  vec3 corner_3 = vec3( 0.0, 1.0, 1.0);
+
+  //Front triangle
+  scene.triangles[0].corners[0] = corner_0;
+  scene.triangles[0].corners[1] = corner_1;
+  scene.triangles[0].corners[2] = corner_2;
+
+  scene.triangles[0].material = scene.spheres[1].material;
+  
+  //Left Triangle
+  scene.triangles[1].corners[0] = corner_0;
+  scene.triangles[1].corners[1] = corner_3;
+  scene.triangles[1].corners[2] = corner_1;
+  scene.triangles[1].material = scene.spheres[1].material;
+
+  //Right triangle
+  scene.triangles[2].corners[0] = corner_1;
+  scene.triangles[2].corners[1] = corner_2;
+  scene.triangles[2].corners[2] = corner_3;
+  scene.triangles[2].material = scene.spheres[1].material;
+
+  //Top triangle
+  scene.triangles[3].corners[0] = corner_0;
+  scene.triangles[3].corners[1] = corner_2;
+  scene.triangles[3].corners[2] = corner_3;
+  scene.triangles[3].material = scene.spheres[1].material;
+  
+
+  for(int i = 0; i < NUM_TRIANGLES; i++)
+  {
+	scene.triangles[i].normal = normalize(cross(
+	scene.triangles[i].corners[1] - scene.triangles[i].corners[0], //B - A
+	scene.triangles[i].corners[2] - scene.triangles[i].corners[0])); //C - A
+
+	vec3 A_to_Origo = vec3(0) - scene.triangles[i].corners[0];
+	float dist = dot(A_to_Origo, scene.triangles[i].normal);
+
+	scene.triangles[i].offset = -dist; //dot(Origo - A, normal)
+  }
 }
 
 
@@ -183,7 +235,6 @@ vec3 simple_sky(vec3 direction)
 
   return (sun_component+haze_component);
 }
-
 
 // Ray-sphere intersection
 float intersect(Ray ray, Sphere s) 
@@ -213,6 +264,37 @@ float intersect(Ray ray, Plane p)
 	return t;
 }
 
+// Ray-triangle intersection
+float intersect(Ray ray, Triangle t) 
+{
+
+	float intersect_distance = 1e32;
+	Plane p;
+	p.offset = t.offset;
+	p.normal = t.normal;
+
+	float plane_distance = intersect(ray, p);
+	vec3 Q = ray.origin + ray.dir * plane_distance;
+
+	vec3 BA = t.corners[1] - t.corners[0];
+	vec3 CB = t.corners[2] - t.corners[1];
+	vec3 AC = t.corners[0] - t.corners[2];
+	
+	vec3 QA = Q - t.corners[0];
+	vec3 QB = Q - t.corners[1];
+	vec3 QC = Q - t.corners[2];
+
+	if( (dot(normalize(cross(BA, QA)), t.normal) >= 0.) && 
+		(dot(normalize(cross(CB, QB)), t.normal) >= 0.) && 
+		(dot(normalize(cross(AC, QC)), t.normal) >= 0.)) 
+	{
+		
+		intersect_distance = plane_distance;
+	}
+
+	return intersect_distance;
+}
+
 // Check for intersection of a ray and all objects in the scene
 Intersection intersect( Ray ray)
 {
@@ -221,28 +303,51 @@ Intersection intersect( Ray ray)
   //COPY YOUR CODE FROM 4.1 HERE
   // Manage intersections
 	float t = 1e32;
-	int id = -1;
-    
-	//Check for intersection with spheres 
-	// Find the closest intersection.
-	for (int i = 0; i < NUM_SPHERES; ++i)
+	//Check triangle intersection
 	{
-		float d = intersect(ray, scene.spheres[i]);
-		if (d>0 && d<=t)
+		int id = -1;
+		for (int i = 0; i < NUM_TRIANGLES; ++i)
 		{
-			t = d; 
-			id = i;
+			float d = intersect(ray, scene.triangles[i]);
+			if (d>0 && d<=t)
+			{
+				t = d; 
+				id = i;
+			}
+		}
+
+		if(id != -1)
+		{
+			I.point = ray.origin + t * ray.dir;
+			I.normal = scene.triangles[id].normal;
+			I.material = scene.triangles[id].material;
 		}
 	}
-
-	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------
-	// Populate I with all the relevant data.  `id` is the closest
-	// sphere that was hit, and `t` is the distance to it.
-	if(id != -1)
+	
+    
+	//Check for intersection with spheres 
 	{
-		I.point = ray.origin + t * ray.dir;
-		I.normal = normalize(I.point - scene.spheres[id].center);
-		I.material = scene.spheres[id].material;
+		int id = -1;
+		// Find the closest intersection.
+		for (int i = 0; i < NUM_SPHERES; ++i)
+		{
+			float d = intersect(ray, scene.spheres[i]);
+			if (d>0 && d<=t)
+			{
+				t = d; 
+				id = i;
+			}
+		}
+
+		// YOUR CODE GOES HERE -------------------------------------------------------------------------------------
+		// Populate I with all the relevant data.  `id` is the closest
+		// sphere that was hit, and `t` is the distance to it.
+		if(id != -1)
+		{
+			I.point = ray.origin + t * ray.dir;
+			I.normal = normalize(I.point - scene.spheres[id].center);
+			I.material = scene.spheres[id].material;
+		}
 	}
 
 
