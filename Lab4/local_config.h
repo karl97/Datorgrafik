@@ -13,10 +13,10 @@
 #define FRAGMENT_SHADER_SOURCE "../Lab4/lab4-2_fs.glsl"
 
 #elif defined(LAB4_3)
-#define FRAGMENT_SHADER_SOURCE "../Lab4/lab4-2_fs.glsl"
+#define FRAGMENT_SHADER_SOURCE "../Lab4/lab4-3_fs.glsl"
 
 #elif defined(LAB4_4)
-#define FRAGMENT_SHADER_SOURCE "../Lab4/lab4-2_fs.glsl"
+#define FRAGMENT_SHADER_SOURCE "../Lab4/lab4-4_fs.glsl"
 
 #endif
 

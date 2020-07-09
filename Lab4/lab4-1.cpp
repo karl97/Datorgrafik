@@ -186,7 +186,7 @@ int main(int argc, char const *argv[])
   if( !glfwInit() )
     exit(EXIT_FAILURE);
   
-  GLFWwindow* window = glfwCreateWindow (w_width, w_height, "Hello Pathtracing", NULL, NULL);
+  GLFWwindow* window = glfwCreateWindow (w_width, w_height, "Hello Pathtracing 4-1", NULL, NULL);
   glfwSetKeyCallback(window, key_callback);
   glfwSetCursorPosCallback(window, cursor_position_callback);
   glfwSetMouseButtonCallback(window, mouse_button_callback);
