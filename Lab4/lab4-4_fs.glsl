@@ -19,7 +19,8 @@ uniform float i_focal_dist;
 
 #define NUM_SPHERES 5
 #define MAX_DEPTH 10
-#define MAX_SAMPLES 1
+#define MAX_SAMPLES 10
+#define PI 3.1415
 
 struct Ray { vec3 origin, dir; float weight;};
 
@@ -155,7 +156,7 @@ void init( )
   scene.ground_plane[0].material.color_glossy = vec3( 0 );
   scene.ground_plane[0].material.roughness = 0;
   scene.ground_plane[0].material.color_emission = vec3( 0 );
-  scene.ground_plane[0].material.reflection = 0.0;
+  scene.ground_plane[0].material.reflection = 1.0;
   scene.ground_plane[0].material.transmission = 0;
   scene.ground_plane[0].material.ior = 1;
 }
@@ -284,123 +285,70 @@ Intersection intersect( Ray ray)
 	return I;
 }
 
-vec3 BP_brdf(float kl, float kg, float f, vec3 indir, vec3 normal, vec3 outdir) // the Blinn-Phong brdf 
+
+float seed = 0.;
+float rand(void){return fract(sin(seed+=0.14) * 43758.5453123);}
+
+vec3 random_direction(vec3 mean, float spread)
 {
-
-	vec3 h=normalize(outdir+indir);
-
-	return vec3(kl/3.14) + vec3(((8+f)/(8*3.14)))*kg*pow(dot(normal,h),f);
+float r2 = spread*rand();
+float phi = 2.0*PI*rand();
+float sina = sqrt(r2);
+float cosa = sqrt(1. - r2);
+vec3 w = normalize(mean), u = normalize(cross(w.yzx, w)),v = cross(w, u);
+return (u*cos(phi) + v*sin(phi)) * sina + w * cosa;
 }
 
-vec3 raytrace() 
+
+
+
+vec3 pathtrace(Ray ray) 
 {
-  vec3 ambient = 0.2 * simple_sky(vec3(0,1,0));   // global ambient light
-  vec3 color = vec3(0);
-
-
-  {
-    // Iterate over all rays on the stack
-    for(int ray_stack_pos=0; ray_stack_pos < ray_stack_size; ++ray_stack_pos)
+    vec3 color = vec3(0);
+    vec3 absorbed= vec3(1);
+    float f;
+    for(int i=0; i < MAX_DEPTH; ++i)
     {
-
-      Ray ray = ray_stack[ray_stack_pos];
-      Intersection isec = intersect(ray);
-
-      vec3 nl = isec.normal * sign(-dot(isec.normal, ray.dir)); 
-      vec3 light_direction = normalize(i_light_position - isec.point);
-
-      vec3 this_color = vec3(0);
-            
-      float reflectivity = isec.material.reflection;
-
-      if (isec.material.transmission > 0)
-      {
-        // YOUR TASK: Create new ray, compute its position, its
-        // direction (based on isec.material.ior) and its weight, and
-        // call push(new_ray). In the next iteration of the for loop,
-        // the new ray will be handled, so no recursive call to
-        // raytrace() is required.
-
-        // Optionally, compute what fraction should be reflected, and
-        // send out a second ray in the reflection
-        // direction. Otherwise, use the block below for specular
-        // reflection.
-
-	      Ray ray2 = ray;
-	      ray2.weight = ray.weight * isec.material.transmission;
-		  if(dot(ray.dir, isec.normal) > 0)
+    f=rand();
+    Intersection isec = intersect(ray);
+    color +=  isec.material.color_emission*absorbed;
+    absorbed *= isec.material.color_diffuse;
+ 
+    
+    if(f<isec.material.reflection)
+    {
+	   ray.dir = random_direction(reflect(ray.dir, isec.normal),0.001);
+	   ray.origin = isec.point + ray.dir * 0.0001;
+    }
+    
+    else if(f<isec.material.reflection+isec.material.transmission)
+    {
+       	  if(dot(ray.dir, isec.normal) > 0)
 		  {
-			ray2.dir = refract(ray.dir, isec.normal, isec.material.ior / 1.0);
+			ray.dir = refract(ray.dir, isec.normal, isec.material.ior / 1.0);
 		  }
 		  else
 		  {
-			ray2.dir = refract(ray.dir, isec.normal, 1.0 / isec.material.ior);
+			ray.dir = refract(ray.dir, isec.normal, 1.0 / isec.material.ior);
 		  }
-
-		  ray2.origin = isec.point + ray2.dir * 0.0001;
-
-		  push( ray2 );
-
-      }
-      
-      if (isec.material.reflection > 0)
-      {
-        // YOUR TASK: Create new ray, compute its position, direction,
-        // and weight, and call push(ray).
-
-	      Ray ray2 = ray;
-	      ray2.weight = ray.weight * isec.material.reflection;
-		  ray2.dir = reflect(ray.dir, isec.normal);
-		  ray2.origin = isec.point + ray2.dir * 0.0001;
-		  
-		  push( ray2 );
-
-      }
-
-      
-      // Now handle non-specular scattering (i.e., the non-recursive case)
-      {
-
-		color += this_color;
-        // YOUR TASK: Create a "shadow feeler" ray and check if this
-        // point is visible from the (single) light source.
-        // If it is in shadow, set a black (or dark "ambient") colour.
-		Ray shadow_feeler;
-		shadow_feeler.origin = isec.point + isec.normal * 0.0001;
-		shadow_feeler.dir = normalize(i_light_position - isec.point);
-		Intersection shadow_feeler_isec = intersect(shadow_feeler);
-
-		vec3 light_in = shadow_feeler.dir;
-		vec3 light_out = -normalize(ray.dir);
-		if(length(shadow_feeler_isec.point) <= 1e20)
-		{
-			//In shadow: Color with ambient light
-			color += ray.weight * ambient* (isec.material.color_diffuse * BP_brdf(1, 0, 0, light_in, isec.normal, light_out) * max(0, dot(light_in, isec.normal)) + isec.material.color_emission);
-		}
-		else
-		{
-			//Not in shadow: Show highlights
-			color += ray.weight * (isec.material.color_diffuse * BP_brdf(1, 3.0, isec.material.roughness, light_in, isec.normal, light_out) * max(0, dot(light_in, isec.normal)) + isec.material.color_emission);
-		}
-
-        // YOUR TASK: If the point is not in shadow, compute the
-        // colour here (using your BRDF, as before).
-        
-            
-        
-
-        
-      }
+          ray.dir=random_direction(ray.dir,0.001);
 
 
+		  ray.origin = isec.point + ray.dir * 0.0001;
     }
-  }
+    else
+    {
+    ray.origin = isec.point + isec.normal * 0.0001;
+    ray.dir=random_direction(isec.normal,1);
+    }
+    }
 
-  return color;
+  return color/MAX_DEPTH;
 }
 
-void main() {
 
+void main() {
+  seed = i_global_time + i_window_size.y * gl_FragCoord.x /i_window_size.x + gl_FragCoord.y / i_window_size.y;
   vec2 tex_coords = gl_FragCoord.xy / i_window_size.xy;
   vec2 uv =  gl_FragCoord.xy - 0.5*i_window_size.xy;
   if(i_display)    
@@ -435,13 +383,14 @@ void main() {
 	ray.dir = normalize(cz*f_dist + uv.x*cx + uv.y*cy);
 
     // Push the ray noto the ray stack
-    push( ray );
-    
-    vec3 color = raytrace(); 
+
+    vec3 color=vec3(0);
+    for(int i=0;i<MAX_SAMPLES;i++){
+    color += pathtrace(ray); 
     
 
     // gamma corrected output color, and blended over several frames (good for path tracer)
-    o_fragment_color = (texture(i_texture,tex_coords)*i_frame_count + vec4( pow ( clamp(color.xyz/MAX_SAMPLES, 0., 1.), vec3(1./2.2)), 1.))/float(1+ i_frame_count); 
-
+    }
+     o_fragment_color = (texture(i_texture,tex_coords)*i_frame_count + vec4( pow ( clamp(color.xyz/MAX_SAMPLES, 0., 1.), vec3(1./2.2)), 1.))/float(1+ i_frame_count); 
   }
 }
