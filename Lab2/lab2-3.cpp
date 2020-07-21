@@ -163,7 +163,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 		// Reload shaders
 		std::string vertex_shader_str = readFile("../Lab2/lab2-3_vs.glsl");
-		std::string fragment_shader_str = readFile("../Lab2/lab2-2_fs.glsl");
+		std::string fragment_shader_str = readFile("../Lab2/lab2-3_2-4_fs.glsl");
 		const char *vertex_shader_src = vertex_shader_str.c_str();
 		const char *fragment_shader_src = fragment_shader_str.c_str();
 
@@ -383,7 +383,7 @@ int main(int argc, char const *argv[])
 	// load and compile shaders  "../lab1-6_vs.glsl" and "../lab1-6_fs.glsl"
 	//-----------------------------------------------------------------------------------------------------------------------------------------------------------//
 	std::string vertex_shader_str = readFile("../Lab2/lab2-3_vs.glsl");
-	std::string fragment_shader_str = readFile("../Lab2/lab2-2_fs.glsl");
+	std::string fragment_shader_str = readFile("../Lab2/lab2-3_2-4_fs.glsl");
 	const char *vertex_shader_src = vertex_shader_str.c_str();
 	const char *fragment_shader_src = fragment_shader_str.c_str();
 
