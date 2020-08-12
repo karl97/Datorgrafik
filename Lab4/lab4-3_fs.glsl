@@ -159,7 +159,7 @@ void init( )
   scene.spheres[4].material.ior = 1;
 
   scene.ground_plane[0].normal = vec3(0,1,0);
-  scene.ground_plane[0].offset = -1;
+  scene.ground_plane[0].offset = 0;
   scene.ground_plane[0].material.color_diffuse = 1.0 * vec3( 0.6 );
   scene.ground_plane[0].material.color_glossy = vec3( 0 );
   scene.ground_plane[0].material.roughness = 0;
