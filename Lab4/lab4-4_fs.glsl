@@ -22,7 +22,11 @@ uniform float i_focal_dist;
 #define MAX_SAMPLES 10
 #define PI 3.1415
 
-struct Ray { vec3 origin, dir; float weight;};
+struct Ray 
+{ 
+    vec3 origin, dir; 
+    float weight;
+};
 
 //-------------------------------------------------------------------------//
 // Keep a global stack of rays for recursion
@@ -32,34 +36,34 @@ int ray_stack_size = 0;
 
 void push( Ray ray )
 {
-  if (ray_stack_size < MAX_DEPTH)
-  {
-    ray_stack[ray_stack_size] = ray;
-    ray_stack_size++;
-  }
-  //else stack overflow -- silently ignore
+    if (ray_stack_size < MAX_DEPTH)
+    {
+        ray_stack[ray_stack_size] = ray;
+        ray_stack_size++;
+    }
+    //else stack overflow -- silently ignore
 }
 
 Ray pop() // This is included for completeness, but actually isn't needed.
 {
-  if (ray_stack_size > 0)
-  {
-    ray_stack_size--;
-    return ray_stack[ray_stack_size];
-  }
-  // else stack underflow -- silently ignore
+    if (ray_stack_size > 0)
+    {
+        ray_stack_size--;
+        return ray_stack[ray_stack_size];
+    }
+    // else stack underflow -- silently ignore
 }
 
 //-------------------------------------------------------------------------//
 
 struct Material{
-  vec3 color_emission;
-  vec3 color_diffuse;
-  vec3 color_glossy;
-  float roughness;
-  float reflection;
-  float transmission;
-  float ior;  
+    vec3 color_emission;
+    vec3 color_diffuse;
+    vec3 color_glossy;
+    float roughness;
+    float reflection;
+    float transmission;
+    float ior;  
 };
 
 struct Intersection
@@ -70,33 +74,24 @@ struct Intersection
 };
 
 struct Sphere {
-  float radius;
-  vec3 center;
-  Material material;
+    float radius;
+    vec3 center;
+    Material material;
 };
 
 struct Plane {
-  float offset;
-  vec3 normal;
-  Material material;
+    float offset;
+    vec3 normal;
+    Material material;
 };
 
 struct Scene {
-
-  Sphere spheres[NUM_SPHERES];
-  Plane ground_plane[1];
-  float sun_brightness;
-
+    Sphere spheres[NUM_SPHERES];
+    Plane ground_plane[1];
+    float sun_brightness;
 };
 
-
-
-
-
-
-
 Scene scene;
-
 
 void init( )
 {  
@@ -161,236 +156,215 @@ void init( )
   scene.ground_plane[0].material.ior = 1;
 }
 
-
 // This function computes a nice-looking sky sphere, with a sun.
 vec3 simple_sky(vec3 direction)
 {
-  float emission_sky = 1e-1 * i_light_color.r;
-  float emission_sun = 10.0 * i_light_color.r*i_light_color.r;
-  vec3 sky_color = vec3(0.35, 0.65, 0.85);
-  vec3 haze_color = vec3(0.8, 0.85, 0.9);
-  vec3 light_color = clamp(i_light_color,0,1);
+    float emission_sky = 1e-1 * i_light_color.r;
+    float emission_sun = 10.0 * i_light_color.r * i_light_color.r;
+    vec3 sky_color = vec3(0.35, 0.65, 0.85);
+    vec3 haze_color = vec3(0.8, 0.85, 0.9);
+    vec3 light_color = clamp(i_light_color, 0, 1);
 
-  float sun_spread = 2500.0;
-  float haze_spread = 1.3;
-  float elevation = acos(direction.y);
+    float sun_spread = 2500.0;
+    float haze_spread = 1.3;
+    float elevation = acos(direction.y);
     
-  float angle = abs(dot(direction, normalize(i_light_position)));
-  float response_sun = pow(angle, sun_spread);
-  float response_haze = pow(elevation, haze_spread);
+    float angle = abs(dot(direction, normalize(i_light_position)));
+    float response_sun = pow(angle, sun_spread);
+    float response_haze = pow(elevation, haze_spread);
 
-  vec3 sun_component = mix(emission_sky*sky_color, emission_sun*light_color,response_sun);
-  vec3 haze_component = mix(vec3(0),  emission_sky*haze_color,response_haze);
+    vec3 sun_component = mix(emission_sky * sky_color, emission_sun * light_color, response_sun);
+    vec3 haze_component = mix(vec3(0), emission_sky * haze_color, response_haze);
 
-  return (sun_component+haze_component);
+    return (sun_component + haze_component);
 }
-
 
 // Ray-sphere intersection
 float intersect(Ray ray, Sphere s) 
 {
-  //COPY YOUR CODE FROM 4.1 HERE
-  float a = dot(ray.dir, ray.dir);
-	vec3 v = ray.origin - s.center;
-	float b = 2 * dot(ray.dir, v);
-	float c = dot(v, v) - s.radius*s.radius;
-	float x = sqrt(b*b - 4 * a * c);
+    float a = dot(ray.dir, ray.dir);
+    vec3 v = ray.origin - s.center;
+    float b = 2 * dot(ray.dir, v);
+    float c = dot(v, v) - s.radius * s.radius;
+    float x = sqrt(b * b - 4 * a * c);
 	
-	float t1 = (- b - x) / 2 * a;
-	float t2 = (- b + x) / 2 * a;
+    float t1 = (-b - x) / 2 * a;
+    float t2 = (-b + x) / 2 * a;
 
-	float t = t1;
-	if(t2 < t1) t = t2;
+    float t = t1;
+    if(t2 < t1) t = t2;
 
-	return t;
+    return t;
 }
 
 // Ray-plane intersection
 float intersect(Ray ray, Plane p) 
 {
-  //COPY YOUR CODE FROM 4.1 HERE
-  float t=(p.offset - dot(p.normal,ray.origin))/dot(p.normal,ray.dir);
-
-	return t;
+    float t=(p.offset - dot(p.normal, ray.origin)) / dot(p.normal, ray.dir);
+    return t;
 }
 
 // Check for intersection of a ray and all objects in the scene
-Intersection intersect( Ray ray)
+Intersection intersect(Ray ray)
 {
-  Intersection I;
+    Intersection I;
 
-  //COPY YOUR CODE FROM 4.1 HERE
-  // Manage intersections
-	float t = 1e32;
-	int id = -1;
+    // Manage intersections
+    float t = 1e32;
+    int id = -1;
     
-	//Check for intersection with spheres 
-	// Find the closest intersection.
-	for (int i = 0; i < NUM_SPHERES; ++i)
-	{
-		float d = intersect(ray, scene.spheres[i]);
-		if (d>0 && d<=t)
-		{
-			t = d; 
-			id = i;
-		}
-	}
+    //Check for intersection with spheres 
+    // Find the closest intersection.
+    for (int i = 0; i < NUM_SPHERES; ++i)
+    {
+        float d = intersect(ray, scene.spheres[i]);
+        if (d > 0 && d <= t)
+        {
+	        t = d; 
+	        id = i;
+        }
+    }
 
-	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------
-	// Populate I with all the relevant data.  `id` is the closest
-	// sphere that was hit, and `t` is the distance to it.
-	if(id != -1)
-	{
-		I.point = ray.origin + t * ray.dir;
-		I.normal = normalize(I.point - scene.spheres[id].center);
-		I.material = scene.spheres[id].material;
-	}
+    // Populate I with all the relevant data.  `id` is the closest
+    // sphere that was hit, and `t` is the distance to it.
+    if(id != -1)
+    {
+        I.point = ray.origin + t * ray.dir;
+        I.normal = normalize(I.point - scene.spheres[id].center);
+        I.material = scene.spheres[id].material;
+    }
 
 
-	//Check for intersection with planes
-	{
-		float d = intersect(ray,scene.ground_plane[0]);
-		if (d>0 && d<=t)
-		{
-			t=d;
-			// YOUR CODE GOES HERE -------------------------------------------------------------------------------------
-			// Populate I with all the relevant data.
-			I.point = ray.origin + t * ray.dir;
-			I.normal = scene.ground_plane[0].normal;
-			I.material = scene.ground_plane[0].material;
-			// Adding a procedural checkerboard texture:
-			I.material.color_diffuse = (mod(floor(I.point.x) + floor(I.point.z),2.0) == 0.0) ?
-			scene.ground_plane[0].material.color_diffuse :
-			vec3(1.0) - scene.ground_plane[0].material.color_diffuse;
-		}
-	}
+    //Check for intersection with planes
+    {
+        float d = intersect(ray, scene.ground_plane[0]);
+        if (d > 0 && d <= t)
+        {
+	        t = d;
+	        // Populate I with all the relevant data.
+	        I.point = ray.origin + t * ray.dir;
+	        I.normal = scene.ground_plane[0].normal;
+	        I.material = scene.ground_plane[0].material;
+	        
+            // Adding a procedural checkerboard texture:
+	        I.material.color_diffuse = (mod(floor(I.point.x) + floor(I.point.z), 2.0) == 0.0) ?
+	        scene.ground_plane[0].material.color_diffuse :
+	        vec3(1.0) - scene.ground_plane[0].material.color_diffuse;
+        }
+    }
 
-	//If no sphere or plane hit, we hit the sky instead
-	if (t>1e20)
-	{
-		I.point = ray.dir*t;
-		I.normal = -ray.dir;
-		vec3 sky = simple_sky(ray.dir); // pick color from sk y function
+    //If no sphere or plane hit, we hit the sky instead
+    if (t > 1e20)
+    {
+        I.point = ray.dir * t;
+        I.normal = -ray.dir;
+        vec3 sky = simple_sky(ray.dir); // pick color from sky function
 
-		// Sky is all emission, no diffuse or glossy shading:
-		I.material.color_diffuse = 0 * sky; 
-		I.material.color_glossy = 0.0 * vec3( 1 );
-		I.material.roughness = 1;
-		I.material.color_emission = 0.3 * sky;
-		I.material.reflection = 0.0;
-		I.material.transmission = 0;
-		I.material.ior = 1;
-
-	}
-	return I;
+        // Sky is all emission, no diffuse or glossy shading:
+        I.material.color_diffuse = 0 * sky; 
+        I.material.color_glossy = 0.0 * vec3( 1 );
+        I.material.roughness = 1;
+        I.material.color_emission = 0.3 * sky;
+        I.material.reflection = 0.0;
+        I.material.transmission = 0;
+        I.material.ior = 1;
+    }
+    return I;
 }
 
-
 float seed = 0.;
-float rand(void){return fract(sin(seed+=0.14) * 43758.5453123);}
+float rand(void)
+{
+    return fract(sin(seed += 0.14) * 43758.5453123);
+}
 
 vec3 random_direction(vec3 mean, float spread)
 {
-float r2 = spread*rand();
-float phi = 2.0*PI*rand();
-float sina = sqrt(r2);
-float cosa = sqrt(1. - r2);
-vec3 w = normalize(mean), u = normalize(cross(w.yzx, w)),v = cross(w, u);
-return (u*cos(phi) + v*sin(phi)) * sina + w * cosa;
+    float r2 = spread * rand();
+    float phi = 2.0 * PI * rand();
+    float sina = sqrt(r2);
+    float cosa = sqrt(1. - r2);
+    vec3 w = normalize(mean);
+    vec3 u = normalize(cross(w.yzx, w));
+    vec3 v = cross(w, u);
+    return (u * cos(phi) + v * sin(phi)) * sina + w * cosa;
 }
-
-
-
 
 vec3 pathtrace(Ray ray) 
 {
     vec3 color = vec3(0);
-    vec3 absorbed= vec3(1);
+    vec3 absorbed = vec3(1);
     float f;
     for(int i=0; i < MAX_DEPTH; ++i)
     {
-    f=rand();
-    Intersection isec = intersect(ray);
-    color +=  isec.material.color_emission*absorbed;
-    absorbed *= isec.material.color_diffuse;
+        f = rand();
+        Intersection isec = intersect(ray);
+        color +=  isec.material.color_emission * absorbed;
+        absorbed *= isec.material.color_diffuse;
  
     
-    if(f<isec.material.reflection)
-    {
-	   ray.dir = random_direction(reflect(ray.dir, isec.normal),0.001);
-	   ray.origin = isec.point + ray.dir * 0.0001;
-    }
+        if(f < isec.material.reflection)
+        {
+            ray.dir = random_direction(reflect(ray.dir, isec.normal), 0.001);
+            ray.origin = isec.point + ray.dir * 0.0001;
+        }
     
-    else if(f<isec.material.reflection+isec.material.transmission)
-    {
-       	  if(dot(ray.dir, isec.normal) > 0)
-		  {
-			ray.dir = refract(ray.dir, isec.normal, isec.material.ior / 1.0);
-		  }
-		  else
-		  {
-			ray.dir = refract(ray.dir, isec.normal, 1.0 / isec.material.ior);
-		  }
-          ray.dir=random_direction(ray.dir,0.001);
-
-
-		  ray.origin = isec.point + ray.dir * 0.0001;
-    }
-    else
-    {
-    ray.origin = isec.point + isec.normal * 0.0001;
-    ray.dir=random_direction(isec.normal,1);
-    }
+        else if(f < isec.material.reflection + isec.material.transmission)
+        {
+            if(dot(ray.dir, isec.normal) > 0)
+            {
+                ray.dir = refract(ray.dir, isec.normal, isec.material.ior / 1.0);
+            }
+            else
+            {
+                ray.dir = refract(ray.dir, isec.normal, 1.0 / isec.material.ior);
+            }
+                ray.dir = random_direction(ray.dir, 0.001);
+                ray.origin = isec.point + ray.dir * 0.0001;
+        }
+        else
+        {
+            ray.origin = isec.point + isec.normal * 0.0001;
+            ray.dir = random_direction(isec.normal, 1);
+        }
     }
 
-  return color/MAX_DEPTH;
+    return color / MAX_DEPTH;
 }
 
 
 void main() {
-  seed = i_global_time + i_window_size.y * gl_FragCoord.x /i_window_size.x + gl_FragCoord.y / i_window_size.y;
-  vec2 tex_coords = gl_FragCoord.xy / i_window_size.xy;
-  vec2 uv =  gl_FragCoord.xy - 0.5*i_window_size.xy;
-  if(i_display)    
-  {
-    o_fragment_color = texture(i_texture,tex_coords);
-  }    
-  else
-  {
+    seed = i_global_time + i_window_size.y * gl_FragCoord.x / i_window_size.x + gl_FragCoord.y / i_window_size.y;
+    vec2 tex_coords = gl_FragCoord.xy / i_window_size.xy;
+    vec2 uv =  gl_FragCoord.xy - 0.5 * i_window_size.xy;
+    if(i_display)    
+    {
+        o_fragment_color = texture(i_texture,tex_coords);
+    }    
+    else
+    {
+        init();
+        Ray ray;
 
-    init();
-
-    Ray ray;
-
-    //COPY YOUR CODE FROM 4.1 HERE
-    // Create a ray
-		
-	//crude zooming by pressing right mouse button
-	float f_dist = i_focal_dist + i_focal_dist*i_mouse_state.w; 
+        //crude zooming by pressing right mouse button
+        float f_dist = i_focal_dist + i_focal_dist * i_mouse_state.w; 
 	
-	//basis for defining the image plane
-	vec3 cx = i_right;
-	vec3 cy = i_up;   
-	vec3 cz = i_dir; 
+        //basis for defining the image plane
+        vec3 cx = i_right;
+        vec3 cy = i_up;   
+        vec3 cz = i_dir; 
 	
-	//scene.spheres[2].center = i_position; //Controll the red glowing sphere
+        ray.origin = i_position;
+        ray.weight = 1;
 
-	ray.origin = i_position;
-	ray.weight = 1;
+        // Compute the correct ray direction using gl_fragCoord and the camera vectors above.
+        ray.dir = normalize(cz * f_dist + uv.x * cx + uv.y * cy);
 
-	// YOUR CODE GOES HERE -------------------------------------------------------------------------------------: 
-	// Compute the correct ray direction using gl_fragCoord and the camera vectors above.
-	ray.dir = normalize(cz*f_dist + uv.x*cx + uv.y*cy);
-
-    // Push the ray noto the ray stack
-
-    vec3 color=vec3(0);
-    for(int i=0;i<MAX_SAMPLES;i++){
-    color += pathtrace(ray); 
-    
-
-    // gamma corrected output color, and blended over several frames (good for path tracer)
+        vec3 color = vec3(0);
+        for(int i=0;i<MAX_SAMPLES;i++)
+        {
+            color += pathtrace(ray); 
+        }
+        o_fragment_color = (texture(i_texture, tex_coords) * i_frame_count + vec4(pow(clamp(color.xyz / MAX_SAMPLES, 0., 1.), vec3(1. / 2.2)), 1.)) / float(1+ i_frame_count); 
     }
-     o_fragment_color = (texture(i_texture,tex_coords)*i_frame_count + vec4( pow ( clamp(color.xyz/MAX_SAMPLES, 0., 1.), vec3(1./2.2)), 1.))/float(1+ i_frame_count); 
-  }
 }
